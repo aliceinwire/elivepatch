@@ -66,6 +66,6 @@ src_prepare() {
 }
 
 src_install() {
-	unset ARCH
+	set_arch_to_kernel
 	emake DESTDIR="${D}" all install
 }
