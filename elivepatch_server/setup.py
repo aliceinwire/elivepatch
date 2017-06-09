@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='elivepatch',
-    version='0.1',
+    version='0.01',
     description='Patching differents gentoo distributions',
     url='https://gentoo.org',
     author='Alice Ferrazzi',

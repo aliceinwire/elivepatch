@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+# (c) 2017, Alice Ferrazzi <alice.ferrazzi@gmail.com>
+#
+# This file is part of elivepatch
+#
+# elivepatch is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# elivepatch is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with elivepatch.  If not, see <http://www.gnu.org/licenses/>.
+
+"""elivepatch API using Flask-RESTful extension."""
+
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..' )
+from flask import Flask, jsonify, abort, make_response
+from flask_restful  import Api, Resource, reqparse, fields, marshal
+from flask_httpauth import HTTPBasicAuth
+from resources import AgentInfo, livepatch
+
+
+def create_app():
+    app = Flask(__name__, static_url_path="")
+
+    api = Api(app)
+    auth = HTTPBasicAuth()
+
+    @auth.get_password
+    def get_password(username):
+        if username == 'elivepatch':
+            return 'default'
+        return None
+
+    @auth.error_handler
+    def unauthorized():
+        # return 403 instead of 401 to prevent browsers from displaying the default
+        # auth dialog
+        return make_response(jsonify({'message': 'Unauthorized access'}), 403)
+    api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/', endpoint='root')
+    api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/v1.0/agent', endpoint='agent')
+    # api.add_resource(livepatch.x, '/elivepatch/api/v1.0/config_retrieve',
+    #                  endpoint='config_retrive')
+    # api.add_resource(livepatch.x, '/elivepatch/api/v1.0/os',
+    #                  endpoint='os')
+    # api.add_resource(livepatch.x, '/elivepatch/api/v1.0/architecture',
+    #                  endpoint='architecture')
+    return app
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True, host='0.0.0.0')
