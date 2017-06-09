@@ -1,0 +1,31 @@
+From 9f7f236cfe9d4592267a6b08483751ad5a1da069 Mon Sep 17 00:00:00 2001
+From: Alice Ferrazzi <alicef@gentoo.org>
+Date: Fri, 9 Jun 2017 01:59:50 +0000
+Subject: [PATCH] Add gentoo distribution
+
+---
+ kpatch-build/kpatch-build | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/kpatch-build/kpatch-build b/kpatch-build/kpatch-build
+index 24b41c97..3eb22b52 100755
+--- a/kpatch-build/kpatch-build
++++ b/kpatch-build/kpatch-build
+@@ -348,7 +348,7 @@ PATCHNAME=$(echo ${PATCHNAME//[^a-zA-Z0-9_-]/-} |cut -c 1-48)
+ 
+ source /etc/os-release
+ DISTRO=$ID
+-if [[ $DISTRO = fedora ]] || [[ $DISTRO = rhel ]] || [[ $DISTRO = ol ]] || [[ $DISTRO = centos ]]; then
++if [[ $DISTRO = fedora ]] || [[ $DISTRO = rhel ]] || [[ $DISTRO = ol ]] || [[ $DISTRO = centos ]] || [[ $DISTRO = gentoo ]]; then
+ 	[[ -z $VMLINUX ]] && VMLINUX=/usr/lib/debug/lib/modules/$ARCHVERSION/vmlinux
+ 	[[ -e "$VMLINUX" ]] || die "kernel-debuginfo-$ARCHVERSION not installed"
+ 
+@@ -383,7 +383,7 @@ elif [[ -e "$SRCDIR"/.config ]] && [[ -e "$VERSIONFILE" ]] && [[ $(cat "$VERSION
+ 	echo "Using cache at $SRCDIR"
+ 
+ else
+-	if [[ $DISTRO = fedora ]] || [[ $DISTRO = rhel ]] || [[ $DISTRO = ol ]] || [[ $DISTRO = centos ]]; then
++	if [[ $DISTRO = fedora ]] || [[ $DISTRO = rhel ]] || [[ $DISTRO = ol ]] || [[ $DISTRO = centos ]] || [[ $DISTRO = gentoo ]]; then
+ 
+ 		echo "Fedora/Red Hat distribution detected"
+ 		rpm -q --quiet rpmdevtools || die "rpmdevtools not installed"
