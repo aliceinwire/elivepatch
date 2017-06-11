@@ -65,7 +65,12 @@ src_prepare() {
 	default
 }
 
+src_compile() {
+	set_arch_to_kernel
+	emake all
+}
+
 src_install() {
 	set_arch_to_kernel
-	emake DESTDIR="${D}" all install
+	emake DESTDIR="${D}" install
 }
