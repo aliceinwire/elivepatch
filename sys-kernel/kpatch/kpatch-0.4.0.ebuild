@@ -25,8 +25,7 @@ RDEPEND="
 	dev-libs/openssl:0=
 	sys-libs/zlib
 	sys-apps/pciutils
-	sys-libs/ncurses
-	sys-apps/yum
+	sys-libs/ncurses:=
 "
 
 DEPEND="
@@ -72,5 +71,7 @@ src_compile() {
 
 src_install() {
 	set_arch_to_kernel
-	emake DESTDIR="${D}" install
+	emake DESTDIR="${D}" PREFIX="/usr" install
+
+	einstalldocs
 }
