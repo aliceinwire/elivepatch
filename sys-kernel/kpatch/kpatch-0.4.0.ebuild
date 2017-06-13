@@ -26,7 +26,6 @@ RDEPEND="
 	sys-libs/zlib
 	sys-apps/pciutils
 	sys-libs/ncurses
-	sys-apps/yum
 "
 
 DEPEND="
