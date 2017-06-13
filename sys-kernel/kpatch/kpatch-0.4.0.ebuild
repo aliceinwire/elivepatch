@@ -25,7 +25,7 @@ RDEPEND="
 	dev-libs/openssl:0=
 	sys-libs/zlib
 	sys-apps/pciutils
-	sys-libs/ncurses
+	sys-libs/ncurses:=
 "
 
 DEPEND="
