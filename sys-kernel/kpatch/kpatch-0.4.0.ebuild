@@ -72,4 +72,6 @@ src_compile() {
 src_install() {
 	set_arch_to_kernel
 	emake DESTDIR="${D}" PREFIX="/usr" install
+
+	einstalldocs
 }
