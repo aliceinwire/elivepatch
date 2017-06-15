@@ -1,11 +1,11 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="6"
+EAPI=6
 
 inherit linux-info linux-mod flag-o-matic
 
-if [[ "${PV}" == "9999" ]]; then
+if [[ ${PV} == *9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/dynup/${PN}.git"
 else
@@ -25,14 +25,12 @@ RDEPEND="
 	dev-libs/openssl:0=
 	sys-libs/zlib
 	sys-apps/pciutils
-	sys-libs/ncurses:=
-"
-
+	sys-libs/ncurses:0
+	sys-apps/yum"
 DEPEND="
 	${RDEPEND}
 	dev-libs/elfutils
-	sys-devel/bison
-"
+	sys-devel/bison"
 
 pkg_pretend() {
 	if kernel_is gt 3 9 0; then
@@ -64,14 +62,8 @@ src_prepare() {
 	default
 }
 
-src_compile() {
-	set_arch_to_kernel
-	emake all
-}
-
 src_install() {
-	set_arch_to_kernel
-	emake DESTDIR="${D}" PREFIX="/usr" install
-
+	unset ARCH
+	emake DESTDIR="${D}" all install
 	einstalldocs
 }
