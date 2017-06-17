@@ -24,14 +24,13 @@ auth = HTTPBasicAuth()
 #TODO make password auth to be same for all resource
 @auth.get_password
 def get_password(username):
-    if username == 'ansible':
+    if username == 'elivepatch':
         return 'default'
     return None
 
 agent_fields = {
     'module': fields.String,
     'version': fields.String,
-    'uri': fields.Url('host')
 }
 
 
