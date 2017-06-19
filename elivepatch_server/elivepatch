@@ -51,6 +51,8 @@ def create_app():
                       endpoint='os')
     api.add_resource(livepatch.LivePAtchActionAPI, '/elivepatch/api/v1.0/architecture',
                       endpoint='architecture')
+    api.add_resource(livepatch.getConfig, '/elivepatch/api/v1.0/config',
+                      endpoint='config')
     return app
 
 if __name__ == '__main__':
