@@ -60,7 +60,7 @@ class LivePAtchActionAPI(Resource):
         return make_response(jsonify({'message': 'These are not the \
         patches you are looking for'})
                              , 403)
-        #return {'packs': [marshal(pack, pack_fields) for pack in packs]}
+        # return {'packs': [marshal(pack, pack_fields) for pack in packs]}
 
     def post(self):
         args = self.reqparse.parse_args()
@@ -72,7 +72,7 @@ class LivePAtchActionAPI(Resource):
             'packageVersion': args['packageVersion'],
             'packageAction': args['packageAction'],
         }
-        #result = livepatch_work.package_get(pack)
+        # result = livepatch_work.package_get(pack)
         result = {'Result':'result'}
         return {'agent': marshal(result, result_fields)}, 201
 
