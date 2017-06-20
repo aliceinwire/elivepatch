@@ -17,16 +17,7 @@
 
 from flask import Flask, jsonify, abort, make_response
 from flask_restful import Api, Resource, reqparse, fields, marshal
-from flask_httpauth import HTTPBasicAuth
-
-auth = HTTPBasicAuth()
-
-#TODO make password auth to be same for all resource
-@auth.get_password
-def get_password(username):
-    if username == 'elivepatch':
-        return 'default'
-    return None
+import werkzeug
 
 pack_fields = {
     'targetHost': fields.String,
@@ -45,7 +36,6 @@ result_fields = {
 packs = None
 
 class LivePAtchActionAPI(Resource):
-    decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -85,3 +75,22 @@ class LivePAtchActionAPI(Resource):
         #result = livepatch_work.package_get(pack)
         result = {'Result':'result'}
         return {'agent': marshal(result, result_fields)}, 201
+
+
+class getConfig(Resource):
+
+    def __init__(self):
+        pass
+
+    def get(self):
+        return make_response(jsonify({'message': 'These are not the \
+        patches you are looking for'})
+                             , 403)
+
+    def post(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+        args = parse.parse_args()
+        audioFile = args['file']
+        print(audioFile)
+        audioFile.save("config.gz")
