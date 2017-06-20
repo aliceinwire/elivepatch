@@ -92,5 +92,7 @@ class getConfig(Resource):
         parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
         args = parse.parse_args()
         audioFile = args['file']
+        audioFile_name = args['file'].filename
+        print(audioFile_name)
         print(audioFile)
-        audioFile.save("config.gz")
+        audioFile.save(audioFile_name)
