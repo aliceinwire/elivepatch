@@ -19,9 +19,15 @@ import subprocess
 
 class PaTch(object):
 
-    def __init__(self, config_file):
+    def __init__(self):
+        self.config_file = None
+        self.patch_file = None
+
+    def set_config(self, config_file):
         self.config_file = config_file
-        print(config_file)
+
+    def set_patch(self, patch_file):
+        self.patch_file = patch_file
 
     def kernel_version(self):
         pass
@@ -42,7 +48,13 @@ class PaTch(object):
     # kpatch-build/kpatch-build -s /usr/src/linux-4.9.16-gentoo/
     # -v /usr/src/linux-4.9.16-gentoo/vmlinux examples/test.patch
     # -c ../elivepatch/elivepatch_server/config --skip-gcc-check
-    def build_livepatch(self, kernel_source, vmlinux, patch_file):
+    def build_livepatch(self, kernel_source, vmlinux):
+        """
+        
+        :param kernel_source: 
+        :param vmlinux: 
+        :return: 
+        """
         bashCommand = 'kpatch-build'
         bashCommand += ' -s '+ kernel_source
         bashCommand += ' -v '+ vmlinux
