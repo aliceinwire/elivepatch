@@ -1,98 +1,54 @@
-# (c) 2015, Alice Ferrazzi <alice.ferrazzi@gmail.com>
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#################################################################################
+# ELIVEPATCH SERVER LIVEPATCH
+#################################################################################
+# File:       livepatch.py
 #
-# This file is part of elivepatch
+#             Handles elivepatch actions via the command line interface.
 #
-# elivepatch is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Copyright:
+#             (c) 2017 Alice Ferrazzi
+#             Distributed under the terms of the GNU General Public License v2
 #
-# elivepatch is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# Author(s):
+#             Alice Ferrazzi <alicef@gentoo.org>
 #
-# You should have received a copy of the GNU General Public License
-# along with elivepatch.  If not, see <http://www.gnu.org/licenses/>.
 
-from flask import Flask, jsonify, abort, make_response
-from flask_restful import Api, Resource, reqparse, fields, marshal
-import werkzeug
+import subprocess
 
-pack_fields = {
-    'targetHost': fields.String,
-    'targetOS': fields.String,
-    'packageName': fields.String,
-    'packageVersion': fields.String,
-    'packageAction': fields.String,
-    'uri': fields.Url('packages')
-}
+class PaTch(object):
 
-result_fields = {
-    'Result': fields.String,
-    'uri': fields.Url('packages')
-}
+    def __init__(self, config_file):
+        self.config_file = config_file
+        print(config_file)
 
-packs = None
-
-class LivePAtchActionAPI(Resource):
-
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('targetHost', type=str, required=True,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('targetOS', type=str, required=True,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('packageName', type=str, required=True,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('packageVersion', type=unicode,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('packageAction', type=str, required=True,
-                                   help='No task title provided',
-                                   location='json')
-        super(LivePAtchActionAPI, self).__init__()
-
-    def get(self):
-        return make_response(jsonify({'message': 'These are not the \
-        patches you are looking for'})
-                             , 403)
-        # return {'packs': [marshal(pack, pack_fields) for pack in packs]}
-
-    def post(self):
-        args = self.reqparse.parse_args()
-        pack = {
-            'id': packs[-1]['id'] + 1,
-            'targetHost': args['targetHost'],
-            'targetOS': args['targetOS'],
-            'packageName': args['packageName'],
-            'packageVersion': args['packageVersion'],
-            'packageAction': args['packageAction'],
-        }
-        # result = livepatch_work.package_get(pack)
-        result = {'Result':'result'}
-        return {'agent': marshal(result, result_fields)}, 201
-
-
-class getConfig(Resource):
-
-    def __init__(self):
+    def kernel_version(self):
         pass
 
-    def get(self):
-        return make_response(jsonify({'message': 'These are not the \
-        patches you are looking for'})
-                             , 403)
+    def compare_kernel_config(self):
+        pass
 
-    def post(self):
-        parse = reqparse.RequestParser()
-        parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
-        args = parse.parse_args()
-        audioFile = args['file']
-        audioFile_name = args['file'].filename
-        print(audioFile_name)
-        print(audioFile)
-        audioFile.save(audioFile_name)
+    def recompile_kernel(self):
+        pass
+
+    def search_kernel_source_path(self):
+        pass
+
+    def get_kernel_source_path(self):
+        self.kernel_path =''
+        return self.kernel_path
+
+    # kpatch-build/kpatch-build -s /usr/src/linux-4.9.16-gentoo/
+    # -v /usr/src/linux-4.9.16-gentoo/vmlinux examples/test.patch
+    # -c ../elivepatch/elivepatch_server/config --skip-gcc-check
+    def build_livepatch(self, kernel_source, vmlinux):
+        bashCommand = 'kpatch-build'
+        bashCommand += ' -s '+ kernel_source
+        bashCommand += ' -v '+ vmlinux
+        bashCommand += ' -c '+ self.config_file
+        bashCommand += ' --skip-gcc-check'
+        print(bashCommand)
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        print(output)
