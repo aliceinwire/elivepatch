@@ -42,11 +42,12 @@ class PaTch(object):
     # kpatch-build/kpatch-build -s /usr/src/linux-4.9.16-gentoo/
     # -v /usr/src/linux-4.9.16-gentoo/vmlinux examples/test.patch
     # -c ../elivepatch/elivepatch_server/config --skip-gcc-check
-    def build_livepatch(self, kernel_source, vmlinux):
+    def build_livepatch(self, kernel_source, vmlinux, patch_file):
         bashCommand = 'kpatch-build'
         bashCommand += ' -s '+ kernel_source
         bashCommand += ' -v '+ vmlinux
         bashCommand += ' -c '+ self.config_file
+        bashCommand += ' ' + self.patch_file
         bashCommand += ' --skip-gcc-check'
         print(bashCommand)
         process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
