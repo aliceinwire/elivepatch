@@ -45,8 +45,12 @@ def create_app():
         return make_response(jsonify({'message': 'Unauthorized access'}), 403)
     api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/', endpoint='root')
     api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/v1.0/agent', endpoint='agent')
+    api.add_resource(dispatcher.getLivePatch, '/elivepatch/api/v1.0/livepatch',
+                     endpoint='livepatch')
     api.add_resource(dispatcher.getConfig, '/elivepatch/api/v1.0/config',
                      endpoint='config')
+    api.add_resource(dispatcher.getPatch, '/elivepatch/api/v1.0/patch',
+                     endpoint='patch')
     return app
 
 if __name__ == '__main__':
