@@ -37,28 +37,19 @@ result_fields = {
 
 packs = None
 
-class LivePAtchActionAPI(Resource):
+lpatch = PaTch()
+
+class getLivePatch(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('targetHost', type=str, required=True,
                                    help='No task title provided',
                                    location='json')
-        self.reqparse.add_argument('targetOS', type=str, required=True,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('packageName', type=str, required=True,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('packageVersion', type=unicode,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('packageAction', type=str, required=True,
-                                   help='No task title provided',
-                                   location='json')
-        super(LivePAtchActionAPI, self).__init__()
+        super(getLivePatch, self).__init__()
 
     def get(self):
+        lpatch.build_livepatch('/usr/src/linux-4.10.16-gentoo/', '/usr/src/linux-4.10.16-gentoo/vmlinux')
         return make_response(jsonify({'message': 'These are not the \
         patches you are looking for'})
                              , 403)
@@ -98,5 +89,25 @@ class getConfig(Resource):
         print(audioFile_name)
         print(audioFile)
         audioFile.save(audioFile_name)
-        lpatch = PaTch(audioFile_name)
-        lpatch.build_livepatch('/usr/src/linux-4.9.16-gentoo/', '/usr/src/linux-4.9.16-gentoo/vmlinux')
+        lpatch.set_config(audioFile_name)
+
+class getPatch(Resource):
+
+    def __init__(self):
+        pass
+
+    def get(self):
+        return make_response(jsonify({'message': 'These are not the \
+        patches you are looking for'})
+                             , 403)
+
+    def post(self):
+        parse = reqparse.RequestParser()
+        parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+        args = parse.parse_args()
+        audioFile = args['file']
+        audioFile_name = args['file'].filename
+        print(audioFile_name)
+        print(audioFile)
+        audioFile.save(audioFile_name)
+        lpatch.set_patch(audioFile_name)
