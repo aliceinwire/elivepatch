@@ -29,6 +29,12 @@ class PaTch(object):
     def set_patch(self, patch_file):
         self.patch_file = patch_file
 
+    def get_config(self):
+        return self.config_file
+
+    def get_patch(self):
+        return self.patch_file
+
     def kernel_version(self):
         pass
 

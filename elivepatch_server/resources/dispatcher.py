@@ -22,20 +22,15 @@ import werkzeug
 from elivepatch_server.resources.livepatch import PaTch
 
 pack_fields = {
-    'targetHost': fields.String,
-    'targetOS': fields.String,
-    'packageName': fields.String,
-    'packageVersion': fields.String,
-    'packageAction': fields.String,
-    'uri': fields.Url('packages')
+    'KernelVersion': fields.String,
+    'LivepatchStatus': fields.String
 }
 
-result_fields = {
-    'Result': fields.String,
-    'uri': fields.Url('packages')
-}
-
-packs = None
+packs = {
+        'id': 1,
+        'KernelVersion': None,
+        'LivepatchStatus': None
+    }
 
 lpatch = PaTch()
 
@@ -43,31 +38,31 @@ class getLivePatch(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('targetHost', type=str, required=True,
+        self.reqparse.add_argument('KernelVersion', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
+        self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
         super(getLivePatch, self).__init__()
+        pass
 
     def get(self):
         lpatch.build_livepatch('/usr/src/linux-4.10.16-gentoo/', '/usr/src/linux-4.10.16-gentoo/vmlinux')
-        return make_response(jsonify({'message': 'These are not the \
-        patches you are looking for'})
-                             , 403)
-        # return {'packs': [marshal(pack, pack_fields) for pack in packs]}
+        #return make_response(jsonify({'message': 'These are not the \
+        #patches you are looking for'})
+        #                     , 403)
+        return {'packs': [marshal(pack, pack_fields) for pack in packs]}
 
     def post(self):
         args = self.reqparse.parse_args()
+        lpatch.build_livepatch('/usr/src/linux-4.10.16-gentoo/', '/usr/src/linux-4.10.16-gentoo/vmlinux')
         pack = {
-            'id': packs[-1]['id'] + 1,
-            'targetHost': args['targetHost'],
-            'targetOS': args['targetOS'],
-            'packageName': args['packageName'],
-            'packageVersion': args['packageVersion'],
-            'packageAction': args['packageAction'],
+            'id': packs['id'] + 1,
+            'KernelVersion': lpatch.get_patch(),
+            'LivepatchStatus': lpatch.get_config(),
         }
-        # result = livepatch_work.package_get(pack)
-        result = {'Result':'result'}
-        return {'agent': marshal(result, result_fields)}, 201
+        return {'agent': marshal(pack, pack_fields)}, 201
 
 
 class getConfig(Resource):
