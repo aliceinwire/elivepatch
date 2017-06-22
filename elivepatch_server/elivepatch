@@ -22,7 +22,6 @@ import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..' )
 from flask import Flask, jsonify, abort, make_response
 from flask_restful  import Api, Resource, reqparse, fields, marshal
-from flask_httpauth import HTTPBasicAuth
 from resources import AgentInfo, dispatcher
 
 
@@ -30,19 +29,7 @@ def create_app():
     app = Flask(__name__, static_url_path="")
 
     api = Api(app)
-    auth = HTTPBasicAuth()
 
-    @auth.get_password
-    def get_password(username):
-        if username == 'elivepatch':
-            return 'default'
-        return None
-
-    @auth.error_handler
-    def unauthorized():
-        # return 403 instead of 401 to prevent browsers from displaying the default
-        # auth dialog
-        return make_response(jsonify({'message': 'Unauthorized access'}), 403)
     api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/', endpoint='root')
     api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/v1.0/agent', endpoint='agent')
     api.add_resource(dispatcher.getLivePatch, '/elivepatch/api/v1.0/livepatch',
