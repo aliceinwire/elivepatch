@@ -22,15 +22,36 @@ class PaTch(object):
     def __init__(self):
         self.config_file = None
         self.patch_file = None
+        self.kernel_version = None
+        self.livepatch_status = "Not started"
+        self.kernel_dir = None
+
+    def set_kernel_dir(self, kernel_dir):
+        self.kernel_dir = kernel_dir
+
+    def get_kernel_dir(self):
+        return self.kernel_dir
+
+    def set_lp_status(self, livepatch_status):
+        self.livepatch_status = livepatch_status
+
+    def get_lp_status(self):
+        return self.livepatch_status
+
+    def set_kernel_version(self, kernel_version):
+        self.kernel_version = kernel_version
+
+    def get_kernel_version(self):
+        return self.kernel_version
+
+    def get_config(self):
+        return self.config_file
 
     def set_config(self, config_file):
         self.config_file = config_file
 
     def set_patch(self, patch_file):
         self.patch_file = patch_file
-
-    def get_config(self):
-        return self.config_file
 
     def get_patch(self):
         return self.patch_file
@@ -61,7 +82,7 @@ class PaTch(object):
         :param vmlinux: 
         :return: 
         """
-        bashCommand = 'kpatch-build'
+        bashCommand = 'sudo kpatch-build'
         bashCommand += ' -s '+ kernel_source
         bashCommand += ' -v '+ vmlinux
         bashCommand += ' -c '+ self.config_file

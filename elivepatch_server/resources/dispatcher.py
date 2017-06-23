@@ -27,12 +27,15 @@ pack_fields = {
 }
 
 packs = {
-        'id': 1,
-        'KernelVersion': None,
-        'LivepatchStatus': None
-    }
+    'id': 1,
+    'KernelVersion': None,
+    'LivepatchStatus': None
+}
 
 lpatch = PaTch()
+lpatch.set_kernel_dir('/usr/src/linux-4.10.14-gentoo/')
+kernel_dir = lpatch.get_kernel_dir()
+
 
 class getLivePatch(Resource):
 
@@ -48,19 +51,20 @@ class getLivePatch(Resource):
         pass
 
     def get(self):
-        lpatch.build_livepatch('/usr/src/linux-4.10.16-gentoo/', '/usr/src/linux-4.10.16-gentoo/vmlinux')
-        #return make_response(jsonify({'message': 'These are not the \
-        #patches you are looking for'})
-        #                     , 403)
+        lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
         return {'packs': [marshal(pack, pack_fields) for pack in packs]}
 
     def post(self):
         args = self.reqparse.parse_args()
-        lpatch.build_livepatch('/usr/src/linux-4.10.16-gentoo/', '/usr/src/linux-4.10.16-gentoo/vmlinux')
+        kernel_config = lpatch.get_config()
+        kernel_patch = lpatch.get_patch()
+        if kernel_config and kernel_patch:
+            lpatch.set_lp_status('working')
+            lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
         pack = {
             'id': packs['id'] + 1,
-            'KernelVersion': lpatch.get_patch(),
-            'LivepatchStatus': lpatch.get_config(),
+            'KernelVersion': args['KernelVersion'],
+            'LivepatchStatus': lpatch.livepatch_status,
         }
         return {'agent': marshal(pack, pack_fields)}, 201
 

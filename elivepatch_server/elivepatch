@@ -18,16 +18,14 @@
 
 """elivepatch API using Flask-RESTful extension."""
 
-import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + '/..' )
 from flask import Flask, jsonify, abort, make_response
 from flask_restful  import Api, Resource, reqparse, fields, marshal
-from resources import AgentInfo, dispatcher
+from elivepatch_server.resources import AgentInfo, dispatcher
 
 
 def create_app():
-    app = Flask(__name__, static_url_path="")
 
+    app = Flask(__name__, static_url_path="")
     api = Api(app)
 
     api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/', endpoint='root')
