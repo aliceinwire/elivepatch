@@ -37,6 +37,38 @@ lpatch.set_kernel_dir('/usr/src/linux-4.10.14-gentoo/')
 kernel_dir = lpatch.get_kernel_dir()
 
 
+class buildLivePatch(Resource):
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('KernelVersion', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
+        self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
+        super(buildLivePatch, self).__init__()
+        pass
+
+    def get(self):
+        lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
+        return {'packs': [marshal(pack, pack_fields) for pack in packs]}
+
+    def post(self):
+        args = self.reqparse.parse_args()
+        kernel_config = lpatch.get_config()
+        kernel_patch = lpatch.get_patch()
+        if kernel_config and kernel_patch:
+            lpatch.set_lp_status('working')
+            lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
+        pack = {
+            'id': packs['id'] + 1,
+            'KernelVersion': args['KernelVersion'],
+            'LivepatchStatus': lpatch.livepatch_status,
+        }
+        return {'agent': marshal(pack, pack_fields)}, 201
+
+
 class getLivePatch(Resource):
 
     def __init__(self):
@@ -51,7 +83,12 @@ class getLivePatch(Resource):
         pass
 
     def get(self):
-        lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
+        # Getting livepatch build status
+        status = lpatch.get_lp_status()
+        if status == 'done':
+            response = make_response()
+            response.headers['content-type'] = 'application/octet-stream'
+            return response
         return {'packs': [marshal(pack, pack_fields) for pack in packs]}
 
     def post(self):
@@ -89,6 +126,7 @@ class getConfig(Resource):
         print(audioFile)
         audioFile.save(audioFile_name)
         lpatch.set_config(audioFile_name)
+
 
 class getPatch(Resource):
 
