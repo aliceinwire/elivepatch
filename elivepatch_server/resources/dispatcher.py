@@ -37,7 +37,7 @@ lpatch.set_kernel_dir('/usr/src/linux-4.10.14-gentoo/')
 kernel_dir = lpatch.get_kernel_dir()
 
 
-class buildLivePatch(Resource):
+class BuildLivePatch(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -47,7 +47,7 @@ class buildLivePatch(Resource):
         self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
-        super(buildLivePatch, self).__init__()
+        super(BuildLivePatch, self).__init__()
         pass
 
     def get(self):
@@ -69,7 +69,7 @@ class buildLivePatch(Resource):
         return {'agent': marshal(pack, pack_fields)}, 201
 
 
-class getLivePatch(Resource):
+class GetLivePatch(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -79,7 +79,7 @@ class getLivePatch(Resource):
         self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
-        super(getLivePatch, self).__init__()
+        super(GetLivePatch, self).__init__()
         pass
 
     def get(self):
@@ -107,7 +107,7 @@ class getLivePatch(Resource):
         return {'agent': marshal(pack, pack_fields)}, 201
 
 
-class getConfig(Resource):
+class GetConfig(Resource):
 
     def __init__(self):
         pass
@@ -129,7 +129,7 @@ class getConfig(Resource):
         lpatch.set_config(audioFile_name)
 
 
-class getPatch(Resource):
+class GetPatch(Resource):
 
     def __init__(self):
         pass

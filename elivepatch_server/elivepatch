@@ -30,13 +30,13 @@ def create_app():
 
     api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/', endpoint='root')
     api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/v1.0/agent', endpoint='agent')
-    api.add_resource(dispatcher.buildLivePatch, '/elivepatch/api/v1.0/build_livepatch',
+    api.add_resource(dispatcher.BuildLivePatch, '/elivepatch/api/v1.0/build_livepatch',
                      endpoint='build_livepatch')
-    api.add_resource(dispatcher.getLivePatch, '/elivepatch/api/v1.0/get_livepatch',
+    api.add_resource(dispatcher.GetLivePatch, '/elivepatch/api/v1.0/get_livepatch',
                      endpoint='get_livepatch')
-    api.add_resource(dispatcher.getConfig, '/elivepatch/api/v1.0/config',
+    api.add_resource(dispatcher.GetConfig, '/elivepatch/api/v1.0/config',
                      endpoint='config')
-    api.add_resource(dispatcher.getPatch, '/elivepatch/api/v1.0/patch',
+    api.add_resource(dispatcher.GetPatch, '/elivepatch/api/v1.0/patch',
                      endpoint='patch')
     return app
 
