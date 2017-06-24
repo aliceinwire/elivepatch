@@ -86,9 +86,10 @@ class getLivePatch(Resource):
         # Getting livepatch build status
         status = lpatch.get_lp_status()
         if status == 'done':
-            response = make_response()
-            response.headers['content-type'] = 'application/octet-stream'
-            return response
+            with open('kpatch-1.ko', 'rb') as fp:
+                response = make_response(fp)
+                response.headers['content-type'] = 'application/octet-stream'
+                return response
         return {'packs': [marshal(pack, pack_fields) for pack in packs]}
 
     def post(self):
