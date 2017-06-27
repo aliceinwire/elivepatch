@@ -13,4 +13,4 @@ before_script:
     - sleep 3
 
 script:
-    - python elivepatch_client/bin/elivepatch --patch elivepatch_client/example/1.patch --config elivepatch_client/example/config --url http://127.0.0.1:5000
+    - PYTHONPATH=$(pwd) python elivepatch_client/bin/elivepatch --patch elivepatch_client/example/1.patch --config elivepatch_client/example/config --url http://127.0.0.1:5000
