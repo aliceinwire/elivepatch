@@ -8,6 +8,9 @@ install:
     - pip install -r elivepatch_client/requirements.txt
     - pip install -r elivepatch_server/requirements.txt
 
+ports:
+    - '5000'
+
 before_script:
     - PYTHONPATH=$(pwd) python elivepatch_server/elivepatch &
     - sleep 3
