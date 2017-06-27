@@ -16,6 +16,7 @@
 #
 
 import subprocess
+import os
 
 class PaTch(object):
 
@@ -36,6 +37,11 @@ class PaTch(object):
         self.livepatch_status = livepatch_status
 
     def get_lp_status(self):
+        return self.livepatch_status
+
+    def update_lp_status(self, file):
+        if os.path.isfile(file):
+            self.livepatch_status = 'done'
         return self.livepatch_status
 
     def set_kernel_version(self, kernel_version):

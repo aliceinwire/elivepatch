@@ -33,7 +33,7 @@ packs = {
 }
 
 lpatch = PaTch()
-lpatch.set_kernel_dir('/usr/src/linux-4.10.14-gentoo/')
+lpatch.set_kernel_dir('/usr/src/linux-4.9.29-gentoo/')
 kernel_dir = lpatch.get_kernel_dir()
 
 
@@ -84,28 +84,19 @@ class GetLivePatch(Resource):
 
     def get(self):
         # Getting livepatch build status
-        status = lpatch.get_lp_status()
+        status = lpatch.update_lp_status("kpatch-1.ko")
         if status == 'done':
             with open('kpatch-1.ko', 'rb') as fp:
-                response = make_response(fp)
+                #print(str(fp.read()))
+                response = make_response(fp.read())
                 response.headers['content-type'] = 'application/octet-stream'
                 return response
         return {'packs': [marshal(pack, pack_fields) for pack in packs]}
 
     def post(self):
-        args = self.reqparse.parse_args()
-        kernel_config = lpatch.get_config()
-        kernel_patch = lpatch.get_patch()
-        if kernel_config and kernel_patch:
-            lpatch.set_lp_status('working')
-            lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
-        pack = {
-            'id': packs['id'] + 1,
-            'KernelVersion': args['KernelVersion'],
-            'LivepatchStatus': lpatch.livepatch_status,
-        }
-        return {'agent': marshal(pack, pack_fields)}, 201
-
+        return make_response(jsonify({'message': 'These are not the \
+        patches you are looking for'})
+                             , 403)
 
 class GetConfig(Resource):
 
