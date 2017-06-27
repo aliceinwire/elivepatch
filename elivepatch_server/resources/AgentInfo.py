@@ -17,16 +17,6 @@
 
 from flask import Flask, jsonify, abort, make_response
 from flask_restful import Api, Resource, reqparse, fields, marshal
-from flask_httpauth import HTTPBasicAuth
-
-auth = HTTPBasicAuth()
-
-#TODO make password auth to be same for all resource
-@auth.get_password
-def get_password(username):
-    if username == 'elivepatch':
-        return 'default'
-    return None
 
 agent_fields = {
     'module': fields.String,
@@ -51,7 +41,6 @@ agents = agentinfo()
 
 
 class AgentAPI(Resource):
-    decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
