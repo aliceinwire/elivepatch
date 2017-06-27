@@ -1,0 +1,16 @@
+language: python
+python:
+    - 2.7
+    - 3.4
+
+# command to install dependencies
+install:
+    - pip install -r elivepatch_client/requirements.txt
+    - pip install -r elivepatch_server/requirements.txt
+
+before_script:
+    - python elivepatch_server/elivepatch &
+    - sleep 3
+
+script:
+    - python elivepatch_client/bin/elivepatch --patch elivepatch_client/example/1.patch --config elivepatch_client/example/config --url http://127.0.0.1:5000
