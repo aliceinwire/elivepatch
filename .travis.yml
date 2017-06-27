@@ -9,7 +9,7 @@ install:
     - pip install -r elivepatch_server/requirements.txt
 
 before_script:
-    - python elivepatch_server/elivepatch &
+    - PYTHONPATH=$(pwd) python elivepatch_server/elivepatch &
     - sleep 3
 
 script:
