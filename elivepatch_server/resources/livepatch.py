@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
+
 # (c) 2017, Alice Ferrazzi <alice.ferrazzi@gmail.com>
 # Distributed under the terms of the GNU General Public License v2 or later
 
@@ -77,12 +77,16 @@ class PaTch(object):
         :param vmlinux: 
         :return: 
         """
+        debug=True
         bashCommand = 'sudo kpatch-build'
-        bashCommand += ' -s '+ kernel_source
-        bashCommand += ' -v '+ vmlinux
-        bashCommand += ' -c '+ self.config_file
+        bashCommand += ' -s ' + kernel_source
+        bashCommand += ' -v ' + vmlinux
+        bashCommand += ' -c ' + self.config_file
         bashCommand += ' ' + self.patch_file
         bashCommand += ' --skip-gcc-check'
+        if debug:
+            bashCommand += ' --skip-cleanup'
+            bashCommand += ' --debug'
         print(bashCommand)
         process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
         output, error = process.communicate()
