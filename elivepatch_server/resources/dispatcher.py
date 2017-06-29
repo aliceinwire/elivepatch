@@ -1,19 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#################################################################################
-# ELIVEPATCH SERVER DISPATCHER
-#################################################################################
-# File:       cli.py
 #
-#             Handles elivepatch actions via the command line interface.
-#
-# Copyright:
-#             (c) 2017 Alice Ferrazzi
-#             Distributed under the terms of the GNU General Public License v2
-#
-# Author(s):
-#             Alice Ferrazzi <alicef@gentoo.org>
-#
+# (c) 2017, Alice Ferrazzi <alice.ferrazzi@gmail.com>
+# Distributed under the terms of the GNU General Public License v2 or later
+
 
 from flask import Flask, jsonify, abort, make_response
 from flask_restful import Api, Resource, reqparse, fields, marshal
