@@ -28,8 +28,8 @@ class PaTch(object):
     def get_lp_status(self):
         return self.livepatch_status
 
-    def update_lp_status(self, file):
-        if os.path.isfile(file):
+    def update_lp_status(self, livepatch):
+        if os.path.isfile(livepatch):
             self.livepatch_status = 'done'
         return self.livepatch_status
 
