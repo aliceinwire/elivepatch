@@ -5,21 +5,28 @@
 # Distributed under the terms of the GNU General Public License v2 or later
 
 
-from flask import Flask, jsonify, abort, make_response
-from flask_restful  import Api, Resource, reqparse, fields, marshal
+from flask import Flask
+from flask_restful import Api
 from elivepatch_server.resources import AgentInfo, dispatcher
 
 
 def create_app():
+    """
+    Create server application
+    """
 
     app = Flask(__name__, static_url_path="")
     api = Api(app)
 
-    api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/', endpoint='root')
-    api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/v1.0/agent', endpoint='agent')
-    api.add_resource(dispatcher.BuildLivePatch, '/elivepatch/api/v1.0/build_livepatch',
+    api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/',
+                     endpoint='root')
+    api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/v1.0/agent',
+                     endpoint='agent')
+    api.add_resource(dispatcher.BuildLivePatch,
+                     '/elivepatch/api/v1.0/build_livepatch',
                      endpoint='build_livepatch')
-    api.add_resource(dispatcher.GetLivePatch, '/elivepatch/api/v1.0/get_livepatch',
+    api.add_resource(dispatcher.GetLivePatch,
+                     '/elivepatch/api/v1.0/get_livepatch',
                      endpoint='get_livepatch')
     api.add_resource(dispatcher.GetConfig, '/elivepatch/api/v1.0/config',
                      endpoint='config')
