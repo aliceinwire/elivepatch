@@ -78,16 +78,16 @@ class PaTch(object):
         :return: 
         """
         debug=True
-        bashCommand = 'sudo kpatch-build'
-        bashCommand += ' -s ' + kernel_source
-        bashCommand += ' -v ' + vmlinux
-        bashCommand += ' -c ' + self.config_file
-        bashCommand += ' ' + self.patch_file
-        bashCommand += ' --skip-gcc-check'
+        bashCommand = ['sudo','kpatch-build']
+        bashCommand.extend(['-s',kernel_source])
+        bashCommand.extend(['-v',vmlinux])
+        bashCommand.extend(['-c',self.config_file])
+        bashCommand.extend([self.patch_file])
+        bashCommand.extend(['--skip-gcc-check'])
         if debug:
-            bashCommand += ' --skip-cleanup'
-            bashCommand += ' --debug'
+            bashCommand.extend(['--skip-cleanup'])
+            bashCommand.extend(['--debug'])
         print(bashCommand)
-        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE)
         output, error = process.communicate()
         print(output)
