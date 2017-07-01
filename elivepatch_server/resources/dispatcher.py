@@ -13,13 +13,16 @@ from elivepatch_server.resources.livepatch import PaTch
 
 pack_fields = {
     'KernelVersion': fields.String,
-    'LivepatchStatus': fields.String
+    'LivepatchStatus': fields.String,
+    'UserID': fields.String
+
 }
 
 packs = {
     'id': 1,
     'KernelVersion': None,
-    'LivepatchStatus': None
+    'LivepatchStatus': None,
+    'UserID': None
 }
 
 lpatch = PaTch()
@@ -37,11 +40,14 @@ class BuildLivePatch(Resource):
         self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
+        self.reqparse.add_argument('UserID', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
         super(BuildLivePatch, self).__init__()
         pass
 
     def get(self):
-        lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
+        #lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
         return {'packs': [marshal(pack, pack_fields) for pack in packs]}
 
     def post(self):
@@ -50,7 +56,8 @@ class BuildLivePatch(Resource):
         kernel_patch = lpatch.get_patch()
         if kernel_config and kernel_patch:
             lpatch.set_lp_status('working')
-            lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
+            print("build livepatch: " + str(args))
+            #lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
         pack = {
             'id': packs['id'] + 1,
             'KernelVersion': args['KernelVersion'],
@@ -69,15 +76,19 @@ class GetLivePatch(Resource):
         self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
+        self.reqparse.add_argument('UserID', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
         super(GetLivePatch, self).__init__()
         pass
 
     def get(self):
+        args = self.reqparse.parse_args()
+        print("get livepatch: " + str(args))
         # Getting livepatch build status
         status = lpatch.update_lp_status("kpatch-1.ko")
         if status == 'done':
             with open('kpatch-1.ko', 'rb') as fp:
-                #print(str(fp.read()))
                 response = make_response(fp.read())
                 response.headers['content-type'] = 'application/octet-stream'
                 return response
@@ -91,6 +102,17 @@ class GetLivePatch(Resource):
 class GetConfig(Resource):
 
     def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('KernelVersion', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
+        self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
+        self.reqparse.add_argument('UserID', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
+        super(GetConfig, self).__init__()
         pass
 
     def get(self):
@@ -99,6 +121,8 @@ class GetConfig(Resource):
                              , 403)
 
     def post(self):
+        args = self.reqparse.parse_args()
+        print("get config: " + str(args))
         parse = reqparse.RequestParser()
         parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
         args = parse.parse_args()
@@ -113,6 +137,17 @@ class GetConfig(Resource):
 class GetPatch(Resource):
 
     def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('KernelVersion', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
+        self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
+        self.reqparse.add_argument('UserID', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
+        super(GetPatch, self).__init__()
         pass
 
     def get(self):
@@ -121,6 +156,8 @@ class GetPatch(Resource):
                              , 403)
 
     def post(self):
+        args = self.reqparse.parse_args()
+        print("get patch: " + str(args))
         parse = reqparse.RequestParser()
         parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
         args = parse.parse_args()
