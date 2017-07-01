@@ -5,8 +5,8 @@
 # Distributed under the terms of the GNU General Public License v2 or later
 
 
-from flask import Flask, jsonify, abort, make_response
-from flask_restful import Api, Resource, reqparse, fields, marshal
+from flask import jsonify, make_response
+from flask_restful import Resource, reqparse, fields, marshal
 import werkzeug
 
 from elivepatch_server.resources.livepatch import PaTch
@@ -47,7 +47,7 @@ class BuildLivePatch(Resource):
         pass
 
     def get(self):
-        #lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
+        # lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
         return {'packs': [marshal(pack, pack_fields) for pack in packs]}
 
     def post(self):
@@ -57,7 +57,7 @@ class BuildLivePatch(Resource):
         if kernel_config and kernel_patch:
             lpatch.set_lp_status('working')
             print("build livepatch: " + str(args))
-            #lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
+            # lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
         pack = {
             'id': packs['id'] + 1,
             'KernelVersion': args['KernelVersion'],
@@ -96,8 +96,8 @@ class GetLivePatch(Resource):
 
     def post(self):
         return make_response(jsonify({'message': 'These are not the \
-        patches you are looking for'})
-                             , 403)
+        patches you are looking for'}), 403)
+
 
 class GetConfig(Resource):
 
@@ -117,14 +117,14 @@ class GetConfig(Resource):
 
     def get(self):
         return make_response(jsonify({'message': 'These are not the \
-        patches you are looking for'})
-                             , 403)
+        patches you are looking for'}), 403)
 
     def post(self):
         args = self.reqparse.parse_args()
         print("get config: " + str(args))
         parse = reqparse.RequestParser()
-        parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+        parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
+                           location='files')
         args = parse.parse_args()
         audioFile = args['file']
         audioFile_name = args['file'].filename
@@ -152,14 +152,14 @@ class GetPatch(Resource):
 
     def get(self):
         return make_response(jsonify({'message': 'These are not the \
-        patches you are looking for'})
-                             , 403)
+        patches you are looking for'}), 403)
 
     def post(self):
         args = self.reqparse.parse_args()
         print("get patch: " + str(args))
         parse = reqparse.RequestParser()
-        parse.add_argument('file', type=werkzeug.datastructures.FileStorage, location='files')
+        parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
+                           location='files')
         args = parse.parse_args()
         audioFile = args['file']
         audioFile_name = args['file'].filename
@@ -167,3 +167,25 @@ class GetPatch(Resource):
         print(audioFile)
         audioFile.save(audioFile_name)
         lpatch.set_patch(audioFile_name)
+
+
+class GetID(Resource):
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('UserID', type=str, required=False,
+                                   help='No task title provided',
+                                   location='json')
+        super(GetID, self).__init__()
+        pass
+
+    def get(self):
+        return make_response(jsonify({'message': 'These are not the \
+        patches you are looking for'}), 403)
+
+    def post(self):
+        args = self.reqparse.parse_args()
+        print("get ID: " + str(args))
+
+
+#def id_check()
