@@ -8,6 +8,7 @@
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse, fields, marshal
 import werkzeug
+import uuid
 
 from elivepatch_server.resources.livepatch import PaTch
 
@@ -28,7 +29,6 @@ packs = {
 lpatch = PaTch()
 lpatch.set_kernel_dir('/usr/src/linux-4.9.29-gentoo/')
 kernel_dir = lpatch.get_kernel_dir()
-
 
 class BuildLivePatch(Resource):
 
@@ -52,6 +52,8 @@ class BuildLivePatch(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
+        if not args['UserID']:
+            args['UserID'] = id_generate()
         kernel_config = lpatch.get_config()
         kernel_patch = lpatch.get_patch()
         if kernel_config and kernel_patch:
@@ -62,8 +64,9 @@ class BuildLivePatch(Resource):
             'id': packs['id'] + 1,
             'KernelVersion': args['KernelVersion'],
             'LivepatchStatus': lpatch.livepatch_status,
+            'UserID' : args['UserID']
         }
-        return {'agent': marshal(pack, pack_fields)}, 201
+        return {'build_livepatch': marshal(pack, pack_fields)}, 201
 
 
 class GetLivePatch(Resource):
@@ -85,6 +88,9 @@ class GetLivePatch(Resource):
     def get(self):
         args = self.reqparse.parse_args()
         print("get livepatch: " + str(args))
+        # check if is a new user
+        if not args['UserID']:
+            args['UserID'] = id_generate()
         # Getting livepatch build status
         status = lpatch.update_lp_status("kpatch-1.ko")
         if status == 'done':
@@ -122,16 +128,25 @@ class GetConfig(Resource):
     def post(self):
         args = self.reqparse.parse_args()
         print("get config: " + str(args))
+        if not args['UserID']:
+            args['UserID'] = id_generate()
         parse = reqparse.RequestParser()
         parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
                            location='files')
-        args = parse.parse_args()
-        audioFile = args['file']
-        audioFile_name = args['file'].filename
+        file_args = parse.parse_args()
+        audioFile = file_args['file']
+        audioFile_name = file_args['file'].filename
         print(audioFile_name)
         print(audioFile)
         audioFile.save(audioFile_name)
         lpatch.set_config(audioFile_name)
+        pack = {
+            'id': packs['id'] + 1,
+            'KernelVersion': None,
+            'LivepatchStatus': lpatch.livepatch_status,
+            'UserID' : args['UserID']
+        }
+        return {'get_config': marshal(pack, pack_fields)}, 201
 
 
 class GetPatch(Resource):
@@ -157,16 +172,26 @@ class GetPatch(Resource):
     def post(self):
         args = self.reqparse.parse_args()
         print("get patch: " + str(args))
+        if not args['UserID']:
+            args['UserID'] = id_generate()
+        # parse file request information's
         parse = reqparse.RequestParser()
         parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
                            location='files')
-        args = parse.parse_args()
-        audioFile = args['file']
-        audioFile_name = args['file'].filename
+        file_args = parse.parse_args()
+        audioFile = file_args['file']
+        audioFile_name = file_args['file'].filename
         print(audioFile_name)
         print(audioFile)
         audioFile.save(audioFile_name)
         lpatch.set_patch(audioFile_name)
+        pack = {
+            'id': packs['id'] + 1,
+            'KernelVersion': None,
+            'LivepatchStatus': lpatch.livepatch_status,
+            'UserID' : args['UserID']
+        }
+        return {'get_patch': marshal(pack, pack_fields)}, 201
 
 
 class GetID(Resource):
@@ -188,4 +213,8 @@ class GetID(Resource):
         print("get ID: " + str(args))
 
 
-#def id_check()
+def id_generate():
+    print('no id')
+    UserID = uuid.uuid4()
+    print(UserID)
+    return UserID
