@@ -9,6 +9,7 @@ from flask import jsonify, make_response
 from flask_restful import Resource, reqparse, fields, marshal
 import werkzeug
 import uuid
+import os
 
 from elivepatch_server.resources.livepatch import PaTch
 
@@ -26,9 +27,15 @@ packs = {
     'UserID': None
 }
 
+
+def set_kernel_dir(kernel_ID):
+    kernel_absolute_path = 'linux-' + str(kernel_ID) + '-gentoo'
+    kernel_path = os.path.join('/usr','src',kernel_absolute_path)
+    lpatch.set_kernel_dir(kernel_path)
+
 lpatch = PaTch()
-lpatch.set_kernel_dir('/usr/src/linux-4.9.29-gentoo/')
 kernel_dir = lpatch.get_kernel_dir()
+set_kernel_dir(kernel_dir)
 
 class BuildLivePatch(Resource):
 
@@ -54,12 +61,17 @@ class BuildLivePatch(Resource):
         args = self.reqparse.parse_args()
         if not args['UserID']:
             args['UserID'] = id_generate()
+        else:
+            print('UserID: ' + str(args['UserID']))
+        if args['KernelVersion']:
+            set_kernel_dir(args['KernelVersion'])
+            kernel_dir = lpatch.get_kernel_dir()
         kernel_config = lpatch.get_config()
         kernel_patch = lpatch.get_patch()
         if kernel_config and kernel_patch:
             lpatch.set_lp_status('working')
             print("build livepatch: " + str(args))
-            # lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
+            lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
         pack = {
             'id': packs['id'] + 1,
             'KernelVersion': args['KernelVersion'],
@@ -91,6 +103,8 @@ class GetLivePatch(Resource):
         # check if is a new user
         if not args['UserID']:
             args['UserID'] = id_generate()
+        else:
+            print('UserID: ' + str(args['UserID']))
         # Getting livepatch build status
         status = lpatch.update_lp_status("kpatch-1.ko")
         if status == 'done':
@@ -117,7 +131,7 @@ class GetConfig(Resource):
                                    location='json')
         self.reqparse.add_argument('UserID', type=str, required=False,
                                    help='No task title provided',
-                                   location='json')
+                                   location='headers')
         super(GetConfig, self).__init__()
         pass
 
@@ -127,17 +141,29 @@ class GetConfig(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        print("get config: " + str(args))
+        print("json get config: " + str(args))
         if not args['UserID']:
-            args['UserID'] = id_generate()
+            args['UserID'] = str(id_generate())
+        else:
+            print('UserID: ' + str(args['UserID']))
         parse = reqparse.RequestParser()
         parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
                            location='files')
+        parse.add_argument('KernelVersion', type=str, required=False,
+                                   location='json')
+        parse.add_argument('LivepatchStatus', type=str, required=False,
+                                   location='json')
+        parse.add_argument('UserID', type=str, required=False,
+                                   location='headers')
         file_args = parse.parse_args()
+        print("file get config: " + str(file_args))
         audioFile = file_args['file']
         audioFile_name = file_args['file'].filename
-        print(audioFile_name)
-        print(audioFile)
+        #print('audiofile_name: '+ str(audioFile_name))
+        #print('audiofile: '+ str(audioFile))
+        audioFile_name = os.path.join('/tmp','elivepatch-' + args['UserID'], audioFile_name)
+        if not os.path.exists('/tmp/elivepatch-' + args['UserID']):
+            os.makedirs('/tmp/elivepatch-' + args['UserID'])
         audioFile.save(audioFile_name)
         lpatch.set_config(audioFile_name)
         pack = {
@@ -161,7 +187,7 @@ class GetPatch(Resource):
                                    location='json')
         self.reqparse.add_argument('UserID', type=str, required=False,
                                    help='No task title provided',
-                                   location='json')
+                                   location='headers')
         super(GetPatch, self).__init__()
         pass
 
@@ -173,7 +199,9 @@ class GetPatch(Resource):
         args = self.reqparse.parse_args()
         print("get patch: " + str(args))
         if not args['UserID']:
-            args['UserID'] = id_generate()
+            args['UserID'] = str(id_generate())
+        else:
+            print('UserID: ' + str(args['UserID']))
         # parse file request information's
         parse = reqparse.RequestParser()
         parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
@@ -181,8 +209,11 @@ class GetPatch(Resource):
         file_args = parse.parse_args()
         audioFile = file_args['file']
         audioFile_name = file_args['file'].filename
-        print(audioFile_name)
-        print(audioFile)
+        #print(audioFile_name)
+        #print(audioFile)
+        audioFile_name = os.path.join('/tmp', 'elivepatch-' + args['UserID'], audioFile_name)
+        if not os.path.exists('/tmp/elivepatch-'+args['UserID']):
+            os.makedirs('/tmp/elivepatch-'+args['UserID'])
         audioFile.save(audioFile_name)
         lpatch.set_patch(audioFile_name)
         pack = {
@@ -214,7 +245,7 @@ class GetID(Resource):
 
 
 def id_generate():
-    print('no id')
+    #print('no id')
     UserID = uuid.uuid4()
-    print(UserID)
+    #print(UserID)
     return UserID
