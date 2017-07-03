@@ -13,6 +13,7 @@ from elivepatch_server.resources import AgentInfo, dispatcher
 def create_app():
     """
     Create server application
+    RESTful api version 1.0
     """
 
     app = Flask(__name__, static_url_path="")
@@ -20,16 +21,26 @@ def create_app():
 
     api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/',
                      endpoint='root')
+
+    # get agento information
     api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/v1.0/agent',
                      endpoint='agent')
+
+    # where to start the livepatch build
     api.add_resource(dispatcher.BuildLivePatch,
                      '/elivepatch/api/v1.0/build_livepatch',
                      endpoint='build_livepatch')
+
+    # where to retrieve the live patch when ready
     api.add_resource(dispatcher.GetLivePatch,
                      '/elivepatch/api/v1.0/get_livepatch',
                      endpoint='get_livepatch')
+
+    # where to receive the config file
     api.add_resource(dispatcher.GetConfig, '/elivepatch/api/v1.0/config',
                      endpoint='config')
+
+    # where to receive the patch file
     api.add_resource(dispatcher.GetPatch, '/elivepatch/api/v1.0/patch',
                      endpoint='patch')
     return app

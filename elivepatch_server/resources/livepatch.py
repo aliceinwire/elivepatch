@@ -91,3 +91,23 @@ class PaTch(object):
         process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE)
         output, error = process.communicate()
         print(output)
+
+    def build_kernel(self, kernel_source_dir):
+        bashCommand = (['sudo','make','oldconfig'])
+        print(bashCommand)
+        process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE, cwd=kernel_source_dir)
+        output, error = process.communicate()
+        print(output)
+
+        bashCommand = (['sudo','make'])
+        print(bashCommand)
+        process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE, cwd=kernel_source_dir)
+        output, error = process.communicate()
+        print(output)
+
+    def get_kernel(self, kernel_version):
+        bashCommand = ['sudo','emerge','-q','"=sys-kernel/gentoo-sources-'+kernel_version+'"']
+        print(bashCommand)
+        process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        print(output)

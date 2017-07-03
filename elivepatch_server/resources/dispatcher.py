@@ -5,11 +5,12 @@
 # Distributed under the terms of the GNU General Public License v2 or later
 
 
+import uuid
+
+import os
+import werkzeug
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse, fields, marshal
-import werkzeug
-import uuid
-import os
 
 from elivepatch_server.resources.livepatch import PaTch
 
@@ -36,6 +37,7 @@ def set_kernel_dir(kernel_ID):
 lpatch = PaTch()
 kernel_dir = lpatch.get_kernel_dir()
 set_kernel_dir(kernel_dir)
+
 
 class BuildLivePatch(Resource):
 
@@ -66,12 +68,18 @@ class BuildLivePatch(Resource):
         if args['KernelVersion']:
             set_kernel_dir(args['KernelVersion'])
             kernel_dir = lpatch.get_kernel_dir()
-        kernel_config = lpatch.get_config()
-        kernel_patch = lpatch.get_patch()
-        if kernel_config and kernel_patch:
-            lpatch.set_lp_status('working')
-            print("build livepatch: " + str(args))
-            lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
+            kernel_config = lpatch.get_config()
+            kernel_patch = lpatch.get_patch()
+            if kernel_config and kernel_patch:
+                lpatch.set_lp_status('working')
+                print("build livepatch: " + str(args))
+                # check vmlinux presence if not rebuild the kernel
+                kernel_vmlinux = os.path.join(kernel_dir, 'vmlinux')
+                if not os.path.isdir(kernel_dir):
+                    lpatch.get_kernel(kernel_dir, kernel_vmlinux)
+                if not os.path.isfile(kernel_vmlinux):
+                    lpatch.build_kernel(kernel_dir)
+                lpatch.build_livepatch(kernel_dir, kernel_vmlinux)
         pack = {
             'id': packs['id'] + 1,
             'KernelVersion': args['KernelVersion'],
@@ -86,9 +94,6 @@ class GetLivePatch(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('KernelVersion', type=str, required=False,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
         self.reqparse.add_argument('UserID', type=str, required=False,
@@ -125,10 +130,7 @@ class GetConfig(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('KernelVersion', type=str, required=False,
                                    help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
-                                   help='No task title provided',
-                                   location='json')
+                                   location='headers')
         self.reqparse.add_argument('UserID', type=str, required=False,
                                    help='No task title provided',
                                    location='headers')
@@ -149,27 +151,23 @@ class GetConfig(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
                            location='files')
-        parse.add_argument('KernelVersion', type=str, required=False,
-                                   location='json')
-        parse.add_argument('LivepatchStatus', type=str, required=False,
-                                   location='json')
-        parse.add_argument('UserID', type=str, required=False,
-                                   location='headers')
         file_args = parse.parse_args()
         print("file get config: " + str(file_args))
-        audioFile = file_args['file']
-        audioFile_name = file_args['file'].filename
-        #print('audiofile_name: '+ str(audioFile_name))
-        #print('audiofile: '+ str(audioFile))
-        audioFile_name = os.path.join('/tmp','elivepatch-' + args['UserID'], audioFile_name)
+        configFile = file_args['file']
+        configFile_name = file_args['file'].filename
+
+        # debug filename
+        #print('configfile_name: '+ str(configFile_name))
+        #print('configfile: '+ str(configFile))
+
+        configFile_name = os.path.join('/tmp','elivepatch-' + args['UserID'], configFile_name)
         if not os.path.exists('/tmp/elivepatch-' + args['UserID']):
             os.makedirs('/tmp/elivepatch-' + args['UserID'])
-        audioFile.save(audioFile_name)
-        lpatch.set_config(audioFile_name)
+        configFile.save(configFile_name)
+        lpatch.set_config(configFile_name)
         pack = {
             'id': packs['id'] + 1,
             'KernelVersion': None,
-            'LivepatchStatus': lpatch.livepatch_status,
             'UserID' : args['UserID']
         }
         return {'get_config': marshal(pack, pack_fields)}, 201
@@ -180,9 +178,6 @@ class GetPatch(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('KernelVersion', type=str, required=False,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
         self.reqparse.add_argument('UserID', type=str, required=False,
@@ -202,24 +197,24 @@ class GetPatch(Resource):
             args['UserID'] = str(id_generate())
         else:
             print('UserID: ' + str(args['UserID']))
+
         # parse file request information's
         parse = reqparse.RequestParser()
         parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
                            location='files')
         file_args = parse.parse_args()
-        audioFile = file_args['file']
-        audioFile_name = file_args['file'].filename
+        patchFile = file_args['file']
+        patchFile_name = file_args['file'].filename
         #print(audioFile_name)
         #print(audioFile)
-        audioFile_name = os.path.join('/tmp', 'elivepatch-' + args['UserID'], audioFile_name)
+        patchFile_name = os.path.join('/tmp', 'elivepatch-' + args['UserID'], patchFile_name)
         if not os.path.exists('/tmp/elivepatch-'+args['UserID']):
             os.makedirs('/tmp/elivepatch-'+args['UserID'])
-        audioFile.save(audioFile_name)
-        lpatch.set_patch(audioFile_name)
+        patchFile.save(patchFile_name)
+        lpatch.set_patch(patchFile_name)
         pack = {
             'id': packs['id'] + 1,
             'KernelVersion': None,
-            'LivepatchStatus': lpatch.livepatch_status,
             'UserID' : args['UserID']
         }
         return {'get_patch': marshal(pack, pack_fields)}, 201
@@ -245,7 +240,5 @@ class GetID(Resource):
 
 
 def id_generate():
-    #print('no id')
     UserID = uuid.uuid4()
-    #print(UserID)
     return UserID

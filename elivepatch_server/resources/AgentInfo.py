@@ -4,8 +4,7 @@
 # (c) 2017, Alice Ferrazzi <alice.ferrazzi@gmail.com>
 # Distributed under the terms of the GNU General Public License v2 or later
 
-from flask import Flask, jsonify, abort, make_response
-from flask_restful import Api, Resource, reqparse, fields, marshal
+from flask_restful import Resource, reqparse, fields, marshal
 
 agent_fields = {
     'module': fields.String,
