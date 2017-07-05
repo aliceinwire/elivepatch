@@ -7,6 +7,7 @@
 import subprocess
 import os
 
+
 class PaTch(object):
 
     def __init__(self):
@@ -64,7 +65,7 @@ class PaTch(object):
         pass
 
     def get_kernel_source_path(self):
-        self.kernel_path =''
+        self.kernel_path = ''
         return self.kernel_path
 
     # kpatch-build/kpatch-build -s /usr/src/linux-4.9.16-gentoo/

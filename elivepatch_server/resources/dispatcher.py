@@ -143,7 +143,7 @@ class GetConfig(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        print("json get config: " + str(args))
+        #print("json get config: " + str(args))
         if not args['UserID']:
             args['UserID'] = str(id_generate())
         else:
@@ -152,7 +152,7 @@ class GetConfig(Resource):
         parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
                            location='files')
         file_args = parse.parse_args()
-        print("file get config: " + str(file_args))
+        #print("file get config: " + str(file_args))
         configFile = file_args['file']
         configFile_name = file_args['file'].filename
 
