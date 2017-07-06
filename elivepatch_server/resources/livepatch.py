@@ -73,10 +73,11 @@ class PaTch(object):
     # -c ../elivepatch/elivepatch_server/config --skip-gcc-check
     def build_livepatch(self, kernel_source, vmlinux):
         """
-        
-        :param kernel_source: 
-        :param vmlinux: 
-        :return: 
+        Function for building the livepatch
+
+        :param kernel_source: directory of the kernel source
+        :param vmlinux: path to the vmlinux file
+        :return: void
         """
         debug=True
         bashCommand = ['sudo','kpatch-build']
@@ -100,6 +101,13 @@ class PaTch(object):
         self.command(['sudo','emerge','-q','"=sys-kernel/gentoo-sources-'+kernel_version+'"'])
 
     def command(self, bashCommand, kernel_source_dir=None):
+        """
+        Popen override function
+
+        :param bashCommand: List of command arguments to execute
+        :param kernel_source_dir: the source directory of the kernel
+        :return: void
+        """
         if kernel_source_dir:
             print(bashCommand)
             process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE,  cwd=kernel_source_dir)
