@@ -88,27 +88,25 @@ class PaTch(object):
         if debug:
             bashCommand.extend(['--skip-cleanup'])
             bashCommand.extend(['--debug'])
-        print(bashCommand)
-        process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE)
-        output, error = process.communicate()
-        print(output)
+        self.command(bashCommand)
 
     def build_kernel(self, kernel_source_dir):
-        bashCommand = (['sudo','make','oldconfig'])
-        print(bashCommand)
-        process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE, cwd=kernel_source_dir)
-        output, error = process.communicate()
-        print(output)
-
-        bashCommand = (['sudo','make'])
-        print(bashCommand)
-        process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE, cwd=kernel_source_dir)
-        output, error = process.communicate()
-        print(output)
+        self.command(['sudo','make','oldconfig'], kernel_source_dir)
+        self.command(['sudo','make'], kernel_source_dir)
+        self.command(['sudo','make', 'modules'], kernel_source_dir)
+        self.command(['sudo','make', 'modules_install'], kernel_source_dir)
 
     def get_kernel(self, kernel_version):
-        bashCommand = ['sudo','emerge','-q','"=sys-kernel/gentoo-sources-'+kernel_version+'"']
-        print(bashCommand)
-        process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE)
-        output, error = process.communicate()
-        print(output)
+        self.command(['sudo','emerge','-q','"=sys-kernel/gentoo-sources-'+kernel_version+'"'])
+
+    def command(self, bashCommand, kernel_source_dir=None):
+        if kernel_source_dir:
+            print(bashCommand)
+            process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE,  cwd=kernel_source_dir)
+            output, error = process.communicate()
+            print(output)
+        else:
+            print(bashCommand)
+            process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE)
+            output, error = process.communicate()
+            print(output)
