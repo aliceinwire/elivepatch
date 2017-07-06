@@ -32,17 +32,13 @@ def create_app():
                      endpoint='build_livepatch')
 
     # where to retrieve the live patch when ready
-    api.add_resource(dispatcher.GetLivePatch,
-                     '/elivepatch/api/v1.0/get_livepatch',
-                     endpoint='get_livepatch')
+    api.add_resource(dispatcher.SendLivePatch,
+                     '/elivepatch/api/v1.0/send_livepatch',
+                     endpoint='send_livepatch')
 
     # where to receive the config file
-    api.add_resource(dispatcher.GetConfig, '/elivepatch/api/v1.0/config',
+    api.add_resource(dispatcher.GetFiles, '/elivepatch/api/v1.0/get_files',
                      endpoint='config')
-
-    # where to receive the patch file
-    api.add_resource(dispatcher.GetPatch, '/elivepatch/api/v1.0/patch',
-                     endpoint='patch')
     return app
 
 if __name__ == '__main__':

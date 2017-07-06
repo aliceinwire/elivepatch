@@ -89,7 +89,7 @@ class BuildLivePatch(Resource):
         return {'build_livepatch': marshal(pack, pack_fields)}, 201
 
 
-class GetLivePatch(Resource):
+class SendLivePatch(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -99,7 +99,7 @@ class GetLivePatch(Resource):
         self.reqparse.add_argument('UserID', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
-        super(GetLivePatch, self).__init__()
+        super(SendLivePatch, self).__init__()
         pass
 
     def get(self):
@@ -124,7 +124,7 @@ class GetLivePatch(Resource):
         patches you are looking for'}), 403)
 
 
-class GetConfig(Resource):
+class GetFiles(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -134,7 +134,7 @@ class GetConfig(Resource):
         self.reqparse.add_argument('UserID', type=str, required=False,
                                    help='No task title provided',
                                    location='headers')
-        super(GetConfig, self).__init__()
+        super(GetFiles, self).__init__()
         pass
 
     def get(self):
@@ -143,81 +143,41 @@ class GetConfig(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        #print("json get config: " + str(args))
         if not args['UserID']:
             args['UserID'] = str(id_generate())
         else:
             print('UserID: ' + str(args['UserID']))
         parse = reqparse.RequestParser()
-        parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
+        parse.add_argument('patch', type=werkzeug.datastructures.FileStorage,
+                           location='files')
+        parse.add_argument('config', type=werkzeug.datastructures.FileStorage,
                            location='files')
         file_args = parse.parse_args()
-        #print("file get config: " + str(file_args))
-        configFile = file_args['file']
-        configFile_name = file_args['file'].filename
+        print("file get config: " + str(file_args))
+        configFile = file_args['config']
+        configFile_name = file_args['config'].filename
 
-        # debug filename
-        #print('configfile_name: '+ str(configFile_name))
-        #print('configfile: '+ str(configFile))
+        patchFile = file_args['patch']
+        patchFile_name = file_args['patch'].filename
 
         configFile_name = os.path.join('/tmp','elivepatch-' + args['UserID'], configFile_name)
         if not os.path.exists('/tmp/elivepatch-' + args['UserID']):
             os.makedirs('/tmp/elivepatch-' + args['UserID'])
         configFile.save(configFile_name)
         lpatch.set_config(configFile_name)
+
+        patchFile_name = os.path.join('/tmp','elivepatch-' + args['UserID'], patchFile_name)
+        if not os.path.exists('/tmp/elivepatch-' + args['UserID']):
+            os.makedirs('/tmp/elivepatch-' + args['UserID'])
+        patchFile.save(patchFile_name)
+        lpatch.set_patch(patchFile_name)
+
         pack = {
-            'id': packs['id'] + 1,
+           'id': packs['id'] + 1,
             'KernelVersion': None,
             'UserID' : args['UserID']
         }
         return {'get_config': marshal(pack, pack_fields)}, 201
-
-
-class GetPatch(Resource):
-
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('KernelVersion', type=str, required=False,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('UserID', type=str, required=False,
-                                   help='No task title provided',
-                                   location='headers')
-        super(GetPatch, self).__init__()
-        pass
-
-    def get(self):
-        return make_response(jsonify({'message': 'These are not the \
-        patches you are looking for'}), 403)
-
-    def post(self):
-        args = self.reqparse.parse_args()
-        print("get patch: " + str(args))
-        if not args['UserID']:
-            args['UserID'] = str(id_generate())
-        else:
-            print('UserID: ' + str(args['UserID']))
-
-        # parse file request information's
-        parse = reqparse.RequestParser()
-        parse.add_argument('file', type=werkzeug.datastructures.FileStorage,
-                           location='files')
-        file_args = parse.parse_args()
-        patchFile = file_args['file']
-        patchFile_name = file_args['file'].filename
-        #print(audioFile_name)
-        #print(audioFile)
-        patchFile_name = os.path.join('/tmp', 'elivepatch-' + args['UserID'], patchFile_name)
-        if not os.path.exists('/tmp/elivepatch-'+args['UserID']):
-            os.makedirs('/tmp/elivepatch-'+args['UserID'])
-        patchFile.save(patchFile_name)
-        lpatch.set_patch(patchFile_name)
-        pack = {
-            'id': packs['id'] + 1,
-            'KernelVersion': None,
-            'UserID' : args['UserID']
-        }
-        return {'get_patch': marshal(pack, pack_fields)}, 201
 
 
 class GetID(Resource):
