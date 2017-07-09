@@ -89,18 +89,26 @@ class PaTch(object):
         if debug:
             bashCommand.extend(['--skip-cleanup'])
             bashCommand.extend(['--debug'])
-        self.command(bashCommand)
+        command(bashCommand)
 
-    def build_kernel(self, kernel_source_dir):
-        self.command(['sudo','make','oldconfig'], kernel_source_dir)
-        self.command(['sudo','make'], kernel_source_dir)
-        self.command(['sudo','make', 'modules'], kernel_source_dir)
-        self.command(['sudo','make', 'modules_install'], kernel_source_dir)
+    def get_kernel_sources(self, uuid_dir, kernel_version):
+        """
+        Function for download the kernel sources
 
-    def get_kernel(self, kernel_version):
-        self.command(['sudo','emerge','-q','"=sys-kernel/gentoo-sources-'+kernel_version+'"'])
+        :return: void
+        """
+        command(['git','clone','https://github.com/aliceinwire/gentoo-sources_overlay.git'])
+        command(['sudo','ROOT=/tmp/' + uuid_dir,'ebuild','gentoo-sources_overlay/sys-kernel/gentoo-sources/gentoo-sources-' + kernel_version + '.ebuild ', 'merge'])
 
-    def command(self, bashCommand, kernel_source_dir=None):
+
+def build_kernel(self, kernel_source_dir):
+        command(['sudo','make','oldconfig'], kernel_source_dir)
+        command(['sudo','make'], kernel_source_dir)
+        command(['sudo','make', 'modules'], kernel_source_dir)
+        command(['sudo','make', 'modules_install'], kernel_source_dir)
+
+
+def command(bashCommand, kernel_source_dir=None):
         """
         Popen override function
 
