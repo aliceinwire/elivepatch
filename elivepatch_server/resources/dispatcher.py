@@ -75,8 +75,7 @@ class BuildLivePatch(Resource):
                 print("build livepatch: " + str(args))
                 # check vmlinux presence if not rebuild the kernel
                 kernel_vmlinux = os.path.join(kernel_dir, 'vmlinux')
-                if not os.path.isdir(kernel_dir):
-                    lpatch.get_kernel(args['KernelVersion'])
+                lpatch.get_kernel_sources(args['UserID'], args['KernelVersion'])
                 if not os.path.isfile(kernel_vmlinux):
                     lpatch.build_kernel(kernel_dir)
                 lpatch.build_livepatch(kernel_dir, kernel_vmlinux)

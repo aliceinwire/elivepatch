@@ -97,15 +97,18 @@ class PaTch(object):
 
         :return: void
         """
-        command(['git','clone','https://github.com/aliceinwire/gentoo-sources_overlay.git'])
-        command(['sudo','ROOT=/tmp/' + uuid_dir,'ebuild','gentoo-sources_overlay/sys-kernel/gentoo-sources/gentoo-sources-' + kernel_version + '.ebuild ', 'merge'])
+        try:
+            command(['git','clone','https://github.com/aliceinwire/gentoo-sources_overlay.git'])
+        except:
+            print('Gentoo-sources overlay already present.')
+        command(['sudo','ROOT=/tmp/' + uuid_dir,'ebuild','gentoo-sources_overlay/sys-kernel/gentoo-sources/gentoo-sources-' + kernel_version + '.ebuild', 'merge'])
 
 
-def build_kernel(self, kernel_source_dir):
-        command(['sudo','make','oldconfig'], kernel_source_dir)
-        command(['sudo','make'], kernel_source_dir)
-        command(['sudo','make', 'modules'], kernel_source_dir)
-        command(['sudo','make', 'modules_install'], kernel_source_dir)
+    def build_kernel(self, kernel_source_dir):
+            command(['sudo','make','oldconfig'], kernel_source_dir)
+            command(['sudo','make'], kernel_source_dir)
+            command(['sudo','make', 'modules'], kernel_source_dir)
+            command(['sudo','make', 'modules_install'], kernel_source_dir)
 
 
 def command(bashCommand, kernel_source_dir=None):
