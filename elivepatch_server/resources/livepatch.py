@@ -71,7 +71,7 @@ class PaTch(object):
     # kpatch-build/kpatch-build -s /usr/src/linux-4.9.16-gentoo/
     # -v /usr/src/linux-4.9.16-gentoo/vmlinux examples/test.patch
     # -c ../elivepatch/elivepatch_server/config --skip-gcc-check
-    def build_livepatch(self, uuid_dir, vmlinux):
+    def build_livepatch(self, uuid, vmlinux):
         """
         Function for building the livepatch
 
@@ -79,11 +79,14 @@ class PaTch(object):
         :param vmlinux: path to the vmlinux file
         :return: void
         """
-        kernel_source = '/tmp/elivepatch-' + uuid_dir + '/usr/src/linux/'
+        kernel_source = os.path.join('/tmp/','elivepatch-' + uuid, 'usr/src/linux/')
+        vmlinux_source = os.path.join(kernel_source, vmlinux)
+        if not os.path.isfile(vmlinux_source):
+            self.build_kernel(uuid)
         debug=True
         bashCommand = ['sudo','kpatch-build']
         bashCommand.extend(['-s',kernel_source])
-        bashCommand.extend(['-v',vmlinux])
+        bashCommand.extend(['-v',vmlinux_source])
         bashCommand.extend(['-c',self.config_file])
         bashCommand.extend([self.patch_file])
         bashCommand.extend(['--skip-gcc-check'])
@@ -107,6 +110,7 @@ class PaTch(object):
 
     def build_kernel(self, uuid_dir):
         kernel_source_dir = '/tmp/elivepatch-' + uuid_dir + '/usr/src/linux/'
+        command(['sudo','cp','/tmp/elivepatch-' + uuid_dir + '/.config',kernel_source_dir + '.config'])
         command(['sudo','make','oldconfig'], kernel_source_dir)
         command(['sudo','make'], kernel_source_dir)
         command(['sudo','make', 'modules'], kernel_source_dir)

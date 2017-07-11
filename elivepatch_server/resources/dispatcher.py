@@ -31,7 +31,7 @@ packs = {
 
 def set_kernel_dir(uuid, kernel_ID):
     kernel_absolute_path = 'linux-' + str(kernel_ID) + '-gentoo'
-    kernel_path = os.path.join('/tmp/', 'elivepatch-' + uuid, '/usr/', 'src', kernel_absolute_path)
+    kernel_path = os.path.join('/tmp/', 'elivepatch-' + uuid, 'usr', 'src', kernel_absolute_path)
     lpatch.set_kernel_dir(kernel_path)
 
 lpatch = PaTch()
@@ -65,18 +65,14 @@ class BuildLivePatch(Resource):
             print('UserID: ' + str(args['UserID']))
         if args['KernelVersion']:
             set_kernel_dir(args['UserID'], args['KernelVersion'])
-            kernel_dir = lpatch.get_kernel_dir()
             kernel_config = lpatch.get_config()
             kernel_patch = lpatch.get_patch()
             if kernel_config and kernel_patch:
                 lpatch.set_lp_status('working')
                 print("build livepatch: " + str(args))
                 # check vmlinux presence if not rebuild the kernel
-                kernel_vmlinux = os.path.join(kernel_dir, 'vmlinux')
                 lpatch.get_kernel_sources(args['UserID'], args['KernelVersion'])
-                if not os.path.isfile(kernel_vmlinux):
-                    lpatch.build_kernel(args['UserID'])
-                lpatch.build_livepatch(args['UserID'], kernel_vmlinux)
+                lpatch.build_livepatch(args['UserID'], 'vmlinux')
         pack = {
             'id': packs['id'] + 1,
             'KernelVersion': args['KernelVersion'],
@@ -108,13 +104,10 @@ class SendLivePatch(Resource):
         else:
             print('UserID: ' + str(args['UserID']))
         # Getting livepatch build status
-        status = lpatch.update_lp_status("kpatch-1.ko")
-        if status == 'done':
-            with open('kpatch-1.ko', 'rb') as fp:
-                response = make_response(fp.read())
-                response.headers['content-type'] = 'application/octet-stream'
-                return response
-        return {'packs': [marshal(pack, pack_fields) for pack in packs]}
+        with open('kpatch-1.ko', 'rb') as fp:
+            response = make_response(fp.read())
+            response.headers['content-type'] = 'application/octet-stream'
+            return response
 
     def post(self):
         return make_response(jsonify({'message': 'These are not the \
