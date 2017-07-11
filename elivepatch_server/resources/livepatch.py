@@ -110,7 +110,7 @@ class PaTch(object):
 
     def build_kernel(self, uuid_dir):
         kernel_source_dir = '/tmp/elivepatch-' + uuid_dir + '/usr/src/linux/'
-        command(['sudo','cp','/tmp/elivepatch-' + uuid_dir + '/.config',kernel_source_dir + '.config'])
+        command(['sudo','cp','/tmp/elivepatch-' + uuid_dir + '/config',kernel_source_dir + '.config'])
         command(['sudo','make','oldconfig'], kernel_source_dir)
         command(['sudo','make'], kernel_source_dir)
         command(['sudo','make', 'modules'], kernel_source_dir)
