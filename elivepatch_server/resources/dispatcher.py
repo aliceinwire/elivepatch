@@ -29,15 +29,13 @@ packs = {
 }
 
 
-def set_kernel_dir(kernel_ID):
+def set_kernel_dir(uuid, kernel_ID):
     kernel_absolute_path = 'linux-' + str(kernel_ID) + '-gentoo'
-    kernel_path = os.path.join('/usr','src',kernel_absolute_path)
+    kernel_path = os.path.join('/tmp/', 'elivepatch-' + uuid, '/usr/', 'src', kernel_absolute_path)
     lpatch.set_kernel_dir(kernel_path)
 
 lpatch = PaTch()
 kernel_dir = lpatch.get_kernel_dir()
-set_kernel_dir(kernel_dir)
-
 
 class BuildLivePatch(Resource):
 
@@ -66,7 +64,7 @@ class BuildLivePatch(Resource):
         else:
             print('UserID: ' + str(args['UserID']))
         if args['KernelVersion']:
-            set_kernel_dir(args['KernelVersion'])
+            set_kernel_dir(args['UserID'], args['KernelVersion'])
             kernel_dir = lpatch.get_kernel_dir()
             kernel_config = lpatch.get_config()
             kernel_patch = lpatch.get_patch()
@@ -77,8 +75,8 @@ class BuildLivePatch(Resource):
                 kernel_vmlinux = os.path.join(kernel_dir, 'vmlinux')
                 lpatch.get_kernel_sources(args['UserID'], args['KernelVersion'])
                 if not os.path.isfile(kernel_vmlinux):
-                    lpatch.build_kernel(kernel_dir)
-                lpatch.build_livepatch(kernel_dir, kernel_vmlinux)
+                    lpatch.build_kernel(args['UserID'])
+                lpatch.build_livepatch(args['UserID'], kernel_vmlinux)
         pack = {
             'id': packs['id'] + 1,
             'KernelVersion': args['KernelVersion'],

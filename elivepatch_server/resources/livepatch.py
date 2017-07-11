@@ -71,7 +71,7 @@ class PaTch(object):
     # kpatch-build/kpatch-build -s /usr/src/linux-4.9.16-gentoo/
     # -v /usr/src/linux-4.9.16-gentoo/vmlinux examples/test.patch
     # -c ../elivepatch/elivepatch_server/config --skip-gcc-check
-    def build_livepatch(self, kernel_source, vmlinux):
+    def build_livepatch(self, uuid_dir, vmlinux):
         """
         Function for building the livepatch
 
@@ -79,6 +79,7 @@ class PaTch(object):
         :param vmlinux: path to the vmlinux file
         :return: void
         """
+        kernel_source = '/tmp/elivepatch-' + uuid_dir + '/usr/src/linux/'
         debug=True
         bashCommand = ['sudo','kpatch-build']
         bashCommand.extend(['-s',kernel_source])
@@ -101,14 +102,15 @@ class PaTch(object):
             command(['git','clone','https://github.com/aliceinwire/gentoo-sources_overlay.git'])
         except:
             print('Gentoo-sources overlay already present.')
-        command(['sudo','ROOT=/tmp/' + uuid_dir,'ebuild','gentoo-sources_overlay/sys-kernel/gentoo-sources/gentoo-sources-' + kernel_version + '.ebuild', 'merge'])
+        command(['sudo','ROOT=/tmp/elivepatch-' + uuid_dir,'ebuild','gentoo-sources_overlay/sys-kernel/gentoo-sources/gentoo-sources-' + kernel_version + '.ebuild', 'clean'])
+        command(['sudo','ROOT=/tmp/elivepatch-' + uuid_dir,'ebuild','gentoo-sources_overlay/sys-kernel/gentoo-sources/gentoo-sources-' + kernel_version + '.ebuild', 'merge'])
 
-
-    def build_kernel(self, kernel_source_dir):
-            command(['sudo','make','oldconfig'], kernel_source_dir)
-            command(['sudo','make'], kernel_source_dir)
-            command(['sudo','make', 'modules'], kernel_source_dir)
-            command(['sudo','make', 'modules_install'], kernel_source_dir)
+    def build_kernel(self, uuid_dir):
+        kernel_source_dir = '/tmp/elivepatch-' + uuid_dir + '/usr/src/linux/'
+        command(['sudo','make','oldconfig'], kernel_source_dir)
+        command(['sudo','make'], kernel_source_dir)
+        command(['sudo','make', 'modules'], kernel_source_dir)
+        command(['sudo','make', 'modules_install'], kernel_source_dir)
 
 
 def command(bashCommand, kernel_source_dir=None):
