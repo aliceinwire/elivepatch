@@ -125,10 +125,14 @@ class SendLivePatch(Resource):
 
         # Getting livepatch build status
         livepatch_full_path = os.path.join(uuid_dir, 'kpatch-'+livepatch_name)
-        with open(livepatch_full_path, 'rb') as fp:
-            response = make_response(fp.read())
-            response.headers['content-type'] = 'application/octet-stream'
-            return response
+        try:
+            with open(livepatch_full_path, 'rb') as fp:
+                response = make_response(fp.read())
+                response.headers['content-type'] = 'application/octet-stream'
+                return response
+        except:
+            return make_response(jsonify({'message': 'These are not the \
+            patches you are looking for'}), 403)
 
     def post(self):
         return make_response(jsonify({'message': 'These are not the \
