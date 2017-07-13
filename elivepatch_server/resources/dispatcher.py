@@ -17,7 +17,7 @@ from elivepatch_server.resources.livepatch import PaTch
 pack_fields = {
     'KernelVersion': fields.String,
     'LivepatchStatus': fields.String,
-    'UserID': fields.String
+    'UUID': fields.String
 
 }
 
@@ -25,13 +25,13 @@ packs = {
     'id': 1,
     'KernelVersion': None,
     'LivepatchStatus': None,
-    'UserID': None
+    'UUID': None
 }
 
 
 def id_generate():
-    UserID = str(uuid.uuid4())
-    return UserID
+    UUID = str(uuid.uuid4())
+    return UUID
 
 
 def check_uuid(uuid):
@@ -39,7 +39,7 @@ def check_uuid(uuid):
         print('Generating new uuid')
         return id_generate()
     else:
-        print('UserID: ' + str(uuid))
+        print('UUID: ' + str(uuid))
         return uuid
 
 
@@ -66,7 +66,7 @@ class BuildLivePatch(Resource):
         self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
-        self.reqparse.add_argument('UserID', type=str, required=False,
+        self.reqparse.add_argument('UUID', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
         super(BuildLivePatch, self).__init__()
@@ -78,22 +78,22 @@ class BuildLivePatch(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args['UserID'] = check_uuid(args['UserID'])
+        args['UUID'] = check_uuid(args['UUID'])
         if args['KernelVersion']:
-            set_kernel_dir(args['UserID'], args['KernelVersion'])
+            set_kernel_dir(args['UUID'], args['KernelVersion'])
             kernel_config = lpatch.get_config()
             kernel_patch = lpatch.get_patch()
             if kernel_config and kernel_patch:
                 lpatch.set_lp_status('working')
                 print("build livepatch: " + str(args))
                 # check vmlinux presence if not rebuild the kernel
-                lpatch.get_kernel_sources(args['UserID'], args['KernelVersion'])
-                lpatch.build_livepatch(args['UserID'], 'vmlinux')
+                lpatch.get_kernel_sources(args['UUID'], args['KernelVersion'])
+                lpatch.build_livepatch(args['UUID'], 'vmlinux')
         pack = {
             'id': packs['id'] + 1,
             'KernelVersion': args['KernelVersion'],
             'LivepatchStatus': lpatch.livepatch_status,
-            'UserID' : args['UserID']
+            'UUID' : args['UUID']
         }
         return {'build_livepatch': marshal(pack, pack_fields)}, 201
 
@@ -105,7 +105,7 @@ class SendLivePatch(Resource):
         self.reqparse.add_argument('KernelVersion', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
-        self.reqparse.add_argument('UserID', type=str, required=False,
+        self.reqparse.add_argument('UUID', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
         super(SendLivePatch, self).__init__()
@@ -115,8 +115,8 @@ class SendLivePatch(Resource):
         args = self.reqparse.parse_args()
         print("get livepatch: " + str(args))
         # check if is a new user
-        args['UserID'] = check_uuid(args['UserID'])
-        uuid_dir = get_uuid_dir(args['UserID'])
+        args['UUID'] = check_uuid(args['UUID'])
+        uuid_dir = get_uuid_dir(args['UUID'])
         patch_name = lpatch.get_patch_filename()
 
         # change patch extension to .ko
@@ -146,7 +146,7 @@ class GetFiles(Resource):
         self.reqparse.add_argument('KernelVersion', type=str, required=False,
                                    help='No task title provided',
                                    location='headers')
-        self.reqparse.add_argument('UserID', type=str, required=False,
+        self.reqparse.add_argument('UUID', type=str, required=False,
                                    help='No task title provided',
                                    location='headers')
         super(GetFiles, self).__init__()
@@ -158,7 +158,7 @@ class GetFiles(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        args['UserID'] = check_uuid(args['UserID'])
+        args['UUID'] = check_uuid(args['UUID'])
         parse = reqparse.RequestParser()
         parse.add_argument('patch', type=werkzeug.datastructures.FileStorage,
                            location='files')
@@ -172,15 +172,15 @@ class GetFiles(Resource):
         patchfile = file_args['patch']
         patchfile_name = file_args['patch'].filename
 
-        configFile_name = os.path.join('/tmp','elivepatch-' + args['UserID'], configFile_name)
-        if not os.path.exists('/tmp/elivepatch-' + args['UserID']):
-            os.makedirs('/tmp/elivepatch-' + args['UserID'])
+        configFile_name = os.path.join('/tmp','elivepatch-' + args['UUID'], configFile_name)
+        if not os.path.exists('/tmp/elivepatch-' + args['UUID']):
+            os.makedirs('/tmp/elivepatch-' + args['UUID'])
         configFile.save(configFile_name)
         lpatch.set_config(configFile_name)
 
-        patch_fulldir_name = os.path.join('/tmp','elivepatch-' + args['UserID'], patchfile_name)
-        if not os.path.exists('/tmp/elivepatch-' + args['UserID']):
-            os.makedirs('/tmp/elivepatch-' + args['UserID'])
+        patch_fulldir_name = os.path.join('/tmp','elivepatch-' + args['UUID'], patchfile_name)
+        if not os.path.exists('/tmp/elivepatch-' + args['UUID']):
+            os.makedirs('/tmp/elivepatch-' + args['UUID'])
         patchfile.save(patch_fulldir_name)
         lpatch.set_patch(patch_fulldir_name)
         lpatch.set_patch_filename(patchfile_name)
@@ -188,7 +188,7 @@ class GetFiles(Resource):
         pack = {
            'id': packs['id'] + 1,
             'KernelVersion': None,
-            'UserID' : args['UserID']
+            'UUID' : args['UUID']
         }
         return {'get_config': marshal(pack, pack_fields)}, 201
 
@@ -197,7 +197,7 @@ class GetID(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('UserID', type=str, required=False,
+        self.reqparse.add_argument('UUID', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
         super(GetID, self).__init__()
