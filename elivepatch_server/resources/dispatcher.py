@@ -29,13 +29,32 @@ packs = {
 }
 
 
-def set_kernel_dir(uuid, kernel_ID):
-    kernel_absolute_path = 'linux-' + str(kernel_ID) + '-gentoo'
+def id_generate():
+    UserID = str(uuid.uuid4())
+    return UserID
+
+
+def check_uuid(uuid):
+    if not uuid:
+        print('Generating new uuid')
+        return id_generate()
+    else:
+        print('UserID: ' + str(uuid))
+        return uuid
+
+
+def get_uuid_dir(uuid):
+    return os.path.join('/tmp/', 'elivepatch-' + uuid)
+
+
+def set_kernel_dir(uuid, kernel_version):
+    kernel_absolute_path = 'linux-' + str(kernel_version) + '-gentoo'
     kernel_path = os.path.join('/tmp/', 'elivepatch-' + uuid, 'usr', 'src', kernel_absolute_path)
     lpatch.set_kernel_dir(kernel_path)
 
 lpatch = PaTch()
 kernel_dir = lpatch.get_kernel_dir()
+
 
 class BuildLivePatch(Resource):
 
@@ -59,10 +78,7 @@ class BuildLivePatch(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        if not args['UserID']:
-            args['UserID'] = id_generate()
-        else:
-            print('UserID: ' + str(args['UserID']))
+        args['UserID'] = check_uuid(args['UserID'])
         if args['KernelVersion']:
             set_kernel_dir(args['UserID'], args['KernelVersion'])
             kernel_config = lpatch.get_config()
@@ -99,12 +115,17 @@ class SendLivePatch(Resource):
         args = self.reqparse.parse_args()
         print("get livepatch: " + str(args))
         # check if is a new user
-        if not args['UserID']:
-            args['UserID'] = id_generate()
-        else:
-            print('UserID: ' + str(args['UserID']))
+        args['UserID'] = check_uuid(args['UserID'])
+        uuid_dir = get_uuid_dir(args['UserID'])
+        patch_name = lpatch.get_patch_filename()
+
+        # change patch extension to .ko
+        base = os.path.splitext(patch_name)[0]
+        livepatch_name = base + ".ko"
+
         # Getting livepatch build status
-        with open('kpatch-1.ko', 'rb') as fp:
+        livepatch_full_path = os.path.join(uuid_dir, 'kpatch-'+livepatch_name)
+        with open(livepatch_full_path, 'rb') as fp:
             response = make_response(fp.read())
             response.headers['content-type'] = 'application/octet-stream'
             return response
@@ -133,10 +154,7 @@ class GetFiles(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        if not args['UserID']:
-            args['UserID'] = str(id_generate())
-        else:
-            print('UserID: ' + str(args['UserID']))
+        args['UserID'] = check_uuid(args['UserID'])
         parse = reqparse.RequestParser()
         parse.add_argument('patch', type=werkzeug.datastructures.FileStorage,
                            location='files')
@@ -147,8 +165,8 @@ class GetFiles(Resource):
         configFile = file_args['config']
         configFile_name = file_args['config'].filename
 
-        patchFile = file_args['patch']
-        patchFile_name = file_args['patch'].filename
+        patchfile = file_args['patch']
+        patchfile_name = file_args['patch'].filename
 
         configFile_name = os.path.join('/tmp','elivepatch-' + args['UserID'], configFile_name)
         if not os.path.exists('/tmp/elivepatch-' + args['UserID']):
@@ -156,11 +174,12 @@ class GetFiles(Resource):
         configFile.save(configFile_name)
         lpatch.set_config(configFile_name)
 
-        patchFile_name = os.path.join('/tmp','elivepatch-' + args['UserID'], patchFile_name)
+        patch_fulldir_name = os.path.join('/tmp','elivepatch-' + args['UserID'], patchfile_name)
         if not os.path.exists('/tmp/elivepatch-' + args['UserID']):
             os.makedirs('/tmp/elivepatch-' + args['UserID'])
-        patchFile.save(patchFile_name)
-        lpatch.set_patch(patchFile_name)
+        patchfile.save(patch_fulldir_name)
+        lpatch.set_patch(patch_fulldir_name)
+        lpatch.set_patch_filename(patchfile_name)
 
         pack = {
            'id': packs['id'] + 1,
@@ -189,6 +208,4 @@ class GetID(Resource):
         print("get ID: " + str(args))
 
 
-def id_generate():
-    UserID = uuid.uuid4()
-    return UserID
+

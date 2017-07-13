@@ -13,6 +13,7 @@ class PaTch(object):
     def __init__(self):
         self.config_file = None
         self.patch_file = None
+        self.patch_filename = None
         self.kernel_version = None
         self.livepatch_status = "Not started"
         self.kernel_dir = None
@@ -49,6 +50,12 @@ class PaTch(object):
     def set_patch(self, patch_file):
         self.patch_file = patch_file
 
+    def set_patch_filename(self, patch_filename):
+        self.patch_filename = patch_filename
+
+    def get_patch_filename(self):
+        return self.patch_filename
+
     def get_patch(self):
         return self.patch_file
 
@@ -80,6 +87,7 @@ class PaTch(object):
         :return: void
         """
         kernel_source = os.path.join('/tmp/','elivepatch-' + uuid, 'usr/src/linux/')
+        uuid_dir = os.path.join('/tmp/','elivepatch-' + uuid)
         vmlinux_source = os.path.join(kernel_source, vmlinux)
         if not os.path.isfile(vmlinux_source):
             self.build_kernel(uuid)
@@ -93,7 +101,7 @@ class PaTch(object):
         if debug:
             bashCommand.extend(['--skip-cleanup'])
             bashCommand.extend(['--debug'])
-        command(bashCommand)
+        command(bashCommand, uuid_dir)
 
     def get_kernel_sources(self, uuid_dir, kernel_version):
         """
