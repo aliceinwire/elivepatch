@@ -5,7 +5,7 @@
 # Distributed under the terms of the GNU General Public License v2 or later
 
 
-import uuid
+import re
 
 import os
 import werkzeug
@@ -29,18 +29,22 @@ packs = {
 }
 
 
-def id_generate():
-    UUID = str(uuid.uuid4())
-    return UUID
-
-
 def check_uuid(uuid):
+    """
+    Check uuid is in the correct format
+    :param uuid:
+    :return:
+    """
     if not uuid:
-        print('Generating new uuid')
-        return id_generate()
+        print('uuid is missing')
     else:
-        print('UUID: ' + str(uuid))
-        return uuid
+        # check uuid format
+        prog = re.compile('^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$')
+        result = prog.match(uuid)
+        if result:
+            print('UUID: ' + str(uuid))
+            return uuid
+        print('uuid format is not correct')
 
 
 def get_uuid_dir(uuid):
@@ -114,7 +118,7 @@ class SendLivePatch(Resource):
     def get(self):
         args = self.reqparse.parse_args()
         print("get livepatch: " + str(args))
-        # check if is a new user
+        # check if is a valid UUID request
         args['UUID'] = check_uuid(args['UUID'])
         uuid_dir = get_uuid_dir(args['UUID'])
         patch_name = lpatch.get_patch_filename()
@@ -210,6 +214,3 @@ class GetID(Resource):
     def post(self):
         args = self.reqparse.parse_args()
         print("get ID: " + str(args))
-
-
-
