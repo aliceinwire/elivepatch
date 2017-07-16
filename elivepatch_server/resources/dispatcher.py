@@ -50,12 +50,6 @@ def check_uuid(uuid):
 def get_uuid_dir(uuid):
     return os.path.join('/tmp/', 'elivepatch-' + uuid)
 
-
-def set_kernel_dir(uuid, kernel_version):
-    kernel_absolute_path = 'linux-' + str(kernel_version) + '-gentoo'
-    kernel_path = os.path.join('/tmp/', 'elivepatch-' + uuid, 'usr', 'src', kernel_absolute_path)
-    lpatch.set_kernel_dir(kernel_path)
-
 lpatch = PaTch()
 kernel_dir = lpatch.get_kernel_dir()
 
@@ -84,7 +78,8 @@ class BuildLivePatch(Resource):
         args = self.reqparse.parse_args()
         args['UUID'] = check_uuid(args['UUID'])
         if args['KernelVersion']:
-            set_kernel_dir(args['UUID'], args['KernelVersion'])
+            lpatch.set_kernel_dir(BuildLivePatch.build_kernel_path(args['UUID'],
+            args['KernelVersion']))
             kernel_config = lpatch.get_config()
             kernel_patch = lpatch.get_patch()
             if kernel_config and kernel_patch:
@@ -100,6 +95,13 @@ class BuildLivePatch(Resource):
             'UUID' : args['UUID']
         }
         return {'build_livepatch': marshal(pack, pack_fields)}, 201
+
+    @staticmethod
+    def build_kernel_path(uuid, kernel_version):
+        kernel_absolute_path = 'linux-' + str(kernel_version) + '-gentoo'
+        kernel_path = os.path.join('/tmp/', 'elivepatch-' + uuid, 'usr',
+                                   'src', kernel_absolute_path)
+        return kernel_path
 
 
 class SendLivePatch(Resource):
