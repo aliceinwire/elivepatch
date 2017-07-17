@@ -50,6 +50,7 @@ def check_uuid(uuid):
 def get_uuid_dir(uuid):
     return os.path.join('/tmp/', 'elivepatch-' + uuid)
 
+# TODO: move lpatch to per request scope instead of global scope
 lpatch = PaTch()
 kernel_dir = lpatch.get_kernel_dir()
 
@@ -179,14 +180,18 @@ class GetFiles(Resource):
         patchfile_name = file_args['patch'].filename
 
         configFile_name = os.path.join('/tmp','elivepatch-' + args['UUID'], configFile_name)
-        if not os.path.exists('/tmp/elivepatch-' + args['UUID']):
+        if os.path.exists('/tmp/elivepatch-' + args['UUID']):
+            # TODO: case the path already exist
+            print('the folder: "/tmp/elivepatch-' + args['UUID'] + '" is already present')
+            pass
+        else:
+            print('creating: "/tmp/elivepatch-' + args['UUID'])
             os.makedirs('/tmp/elivepatch-' + args['UUID'])
+
         configFile.save(configFile_name)
         lpatch.set_config(configFile_name)
 
         patch_fulldir_name = os.path.join('/tmp','elivepatch-' + args['UUID'], patchfile_name)
-        if not os.path.exists('/tmp/elivepatch-' + args['UUID']):
-            os.makedirs('/tmp/elivepatch-' + args['UUID'])
         patchfile.save(patch_fulldir_name)
         lpatch.set_patch(patch_fulldir_name)
         lpatch.set_patch_filename(patchfile_name)
