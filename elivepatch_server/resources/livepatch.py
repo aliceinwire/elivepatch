@@ -86,6 +86,7 @@ class PaTch(object):
         :param vmlinux: path to the vmlinux file
         :return: void
         """
+        # TODO: use $CACHEDIR for define the .kpatch folder, if needed
         kernel_source = os.path.join('/tmp/','elivepatch-' + uuid, 'usr/src/linux/')
         uuid_dir = os.path.join('/tmp/','elivepatch-' + uuid)
         vmlinux_source = os.path.join(kernel_source, vmlinux)
