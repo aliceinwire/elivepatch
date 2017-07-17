@@ -82,7 +82,7 @@ class PaTch(object):
         """
         Function for building the livepatch
 
-        :param kernel_source: directory of the kernel source
+        :param uuid: UUID session identification
         :param vmlinux: path to the vmlinux file
         :return: void
         """
@@ -92,7 +92,7 @@ class PaTch(object):
         if not os.path.isfile(vmlinux_source):
             self.build_kernel(uuid)
         debug=True
-        bashCommand = ['sudo','kpatch-build']
+        bashCommand = ['kpatch-build']
         bashCommand.extend(['-s',kernel_source])
         bashCommand.extend(['-v',vmlinux_source])
         bashCommand.extend(['-c',self.config_file])
@@ -112,9 +112,8 @@ class PaTch(object):
         try:
             command(['git','clone','https://github.com/aliceinwire/gentoo-sources_overlay.git'])
         except:
-            print('Gentoo-sources overlay already present.')
-        command(['sudo','ROOT=/tmp/elivepatch-' + uuid_dir,'ebuild','gentoo-sources_overlay/sys-kernel/gentoo-sources/gentoo-sources-' + kernel_version + '.ebuild', 'clean'])
-        command(['sudo','ROOT=/tmp/elivepatch-' + uuid_dir,'ebuild','gentoo-sources_overlay/sys-kernel/gentoo-sources/gentoo-sources-' + kernel_version + '.ebuild', 'merge'])
+            print('git clone failed.')
+        command(['sudo','ROOT=/tmp/elivepatch-' + uuid_dir,'ebuild','gentoo-sources_overlay/sys-kernel/gentoo-sources/gentoo-sources-' + kernel_version + '.ebuild', 'clean', 'merge'])
 
     def build_kernel(self, uuid_dir):
         kernel_source_dir = '/tmp/elivepatch-' + uuid_dir + '/usr/src/linux/'
