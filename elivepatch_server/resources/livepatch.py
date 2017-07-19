@@ -115,7 +115,8 @@ class PaTch(object):
         except:
             print('git clone failed.')
 
-        ebuild_path = os.path.join('/tmp', 'elivepatch-' + uuid_dir, 'gentoo-sources_overlay', 'sys-kernel', 'gentoo-sources', 'gentoo-sources-' + kernel_version + '.ebuild')
+        ebuild_path = os.path.join('gentoo-sources_overlay', 'sys-kernel', 'gentoo-sources', 'gentoo-sources-' + kernel_version + '.ebuild')
+        print(ebuild_path)
         if os.path.isfile(ebuild_path):
             command(['sudo', 'ROOT=/tmp/elivepatch-' + uuid_dir, 'ebuild', ebuild_path, 'clean', 'merge'])
         else:
