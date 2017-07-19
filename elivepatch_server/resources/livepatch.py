@@ -114,7 +114,12 @@ class PaTch(object):
             command(['git','clone','https://github.com/aliceinwire/gentoo-sources_overlay.git'])
         except:
             print('git clone failed.')
-        command(['sudo','ROOT=/tmp/elivepatch-' + uuid_dir,'ebuild','gentoo-sources_overlay/sys-kernel/gentoo-sources/gentoo-sources-' + kernel_version + '.ebuild', 'clean', 'merge'])
+
+        ebuild_path = os.path.join('/tmp', 'elivepatch-' + uuid_dir, 'gentoo-sources_overlay', 'sys-kernel', 'gentoo-sources', 'gentoo-sources-' + kernel_version + '.ebuild')
+        if os.path.isfile(ebuild_path):
+            command(['sudo', 'ROOT=/tmp/elivepatch-' + uuid_dir, 'ebuild', ebuild_path, 'clean', 'merge'])
+        else:
+            print('ebuild not present')
 
     def build_kernel(self, uuid_dir):
         kernel_source_dir = '/tmp/elivepatch-' + uuid_dir + '/usr/src/linux/'
@@ -123,7 +128,6 @@ class PaTch(object):
         command(['sudo','make'], kernel_source_dir)
         command(['sudo','make', 'modules'], kernel_source_dir)
         command(['sudo','make', 'modules_install'], kernel_source_dir)
-
 
 def command(bashCommand, kernel_source_dir=None):
         """
