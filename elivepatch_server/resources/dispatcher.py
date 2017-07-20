@@ -16,7 +16,6 @@ from elivepatch_server.resources.livepatch import PaTch
 
 pack_fields = {
     'KernelVersion': fields.String,
-    'LivepatchStatus': fields.String,
     'UUID': fields.String
 
 }
@@ -24,7 +23,6 @@ pack_fields = {
 packs = {
     'id': 1,
     'KernelVersion': None,
-    'LivepatchStatus': None,
     'UUID': None
 }
 
@@ -50,19 +48,12 @@ def check_uuid(uuid):
 def get_uuid_dir(uuid):
     return os.path.join('/tmp/', 'elivepatch-' + uuid)
 
-# TODO: move lpatch to per request scope instead of global scope
-lpatch = PaTch()
-kernel_dir = lpatch.get_kernel_dir()
-
 
 class BuildLivePatch(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('KernelVersion', type=str, required=False,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('LivepatchStatus', type=str, required=False,
                                    help='No task title provided',
                                    location='json')
         self.reqparse.add_argument('UUID', type=str, required=False,
@@ -72,27 +63,20 @@ class BuildLivePatch(Resource):
         pass
 
     def get(self):
-        # lpatch.build_livepatch(kernel_dir, kernel_dir + '/vmlinux')
         return {'packs': [marshal(pack, pack_fields) for pack in packs]}
 
     def post(self):
+        lpatch = PaTch()
         args = self.reqparse.parse_args()
         args['UUID'] = check_uuid(args['UUID'])
         if args['KernelVersion']:
-            lpatch.set_kernel_dir(BuildLivePatch.build_kernel_path(args['UUID'],
-            args['KernelVersion']))
-            kernel_config = lpatch.get_config()
-            kernel_patch = lpatch.get_patch()
-            if kernel_config and kernel_patch:
-                lpatch.set_lp_status('working')
-                print("build livepatch: " + str(args))
-                # check vmlinux presence if not rebuild the kernel
-                lpatch.get_kernel_sources(args['UUID'], args['KernelVersion'])
-                lpatch.build_livepatch(args['UUID'], 'vmlinux')
+            print("build livepatch: " + str(args))
+            # check vmlinux presence if not rebuild the kernel
+            lpatch.get_kernel_sources(args['UUID'], args['KernelVersion'])
+            lpatch.build_livepatch(args['UUID'], 'vmlinux')
         pack = {
             'id': packs['id'] + 1,
             'KernelVersion': args['KernelVersion'],
-            'LivepatchStatus': lpatch.livepatch_status,
             'UUID' : args['UUID']
         }
         return {'build_livepatch': marshal(pack, pack_fields)}, 201
@@ -124,14 +108,8 @@ class SendLivePatch(Resource):
         # check if is a valid UUID request
         args['UUID'] = check_uuid(args['UUID'])
         uuid_dir = get_uuid_dir(args['UUID'])
-        patch_name = lpatch.get_patch_filename()
 
-        # change patch extension to .ko
-        base = os.path.splitext(patch_name)[0]
-        livepatch_name = base + ".ko"
-
-        # Getting livepatch build status
-        livepatch_full_path = os.path.join(uuid_dir, 'kpatch-'+livepatch_name)
+        livepatch_full_path = os.path.join(uuid_dir, 'kpatch-'+ str(args['UUID']) + '-livepatch.ko')
         try:
             with open(livepatch_full_path, 'rb') as fp:
                 response = make_response(fp.read())
@@ -189,12 +167,9 @@ class GetFiles(Resource):
             os.makedirs('/tmp/elivepatch-' + args['UUID'])
 
         configFile.save(configFile_name)
-        lpatch.set_config(configFile_name)
 
         patch_fulldir_name = os.path.join('/tmp','elivepatch-' + args['UUID'], patchfile_name)
         patchfile.save(patch_fulldir_name)
-        lpatch.set_patch(patch_fulldir_name)
-        lpatch.set_patch_filename(patchfile_name)
 
         pack = {
            'id': packs['id'] + 1,

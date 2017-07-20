@@ -11,69 +11,7 @@ import os
 class PaTch(object):
 
     def __init__(self):
-        self.config_file = None
-        self.patch_file = None
-        self.patch_filename = None
-        self.kernel_version = None
-        self.livepatch_status = "Not started"
-        self.kernel_dir = None
-
-    def set_kernel_dir(self, kernel_dir):
-        self.kernel_dir = kernel_dir
-
-    def get_kernel_dir(self):
-        return self.kernel_dir
-
-    def set_lp_status(self, livepatch_status):
-        self.livepatch_status = livepatch_status
-
-    def get_lp_status(self):
-        return self.livepatch_status
-
-    def update_lp_status(self, livepatch):
-        if os.path.isfile(livepatch):
-            self.livepatch_status = 'done'
-        return self.livepatch_status
-
-    def set_kernel_version(self, kernel_version):
-        self.kernel_version = kernel_version
-
-    def get_kernel_version(self):
-        return self.kernel_version
-
-    def get_config(self):
-        return self.config_file
-
-    def set_config(self, config_file):
-        self.config_file = config_file
-
-    def set_patch(self, patch_file):
-        self.patch_file = patch_file
-
-    def set_patch_filename(self, patch_filename):
-        self.patch_filename = patch_filename
-
-    def get_patch_filename(self):
-        return self.patch_filename
-
-    def get_patch(self):
-        return self.patch_file
-
-    def kernel_version(self):
         pass
-
-    def compare_kernel_config(self):
-        pass
-
-    def recompile_kernel(self):
-        pass
-
-    def search_kernel_source_path(self):
-        pass
-
-    def get_kernel_source_path(self):
-        self.kernel_path = ''
-        return self.kernel_path
 
     # kpatch-build/kpatch-build -s /usr/src/linux-4.9.16-gentoo/
     # -v /usr/src/linux-4.9.16-gentoo/vmlinux examples/test.patch
@@ -96,8 +34,8 @@ class PaTch(object):
         bashCommand = ['kpatch-build']
         bashCommand.extend(['-s',kernel_source])
         bashCommand.extend(['-v',vmlinux_source])
-        bashCommand.extend(['-c',self.config_file])
-        bashCommand.extend([self.patch_file])
+        bashCommand.extend(['-c','config'])
+        bashCommand.extend(['01.patch'])
         bashCommand.extend(['--skip-gcc-check'])
         if debug:
             bashCommand.extend(['--skip-cleanup'])
@@ -125,10 +63,12 @@ class PaTch(object):
     def build_kernel(self, uuid_dir):
         kernel_source_dir = '/tmp/elivepatch-' + uuid_dir + '/usr/src/linux/'
         command(['sudo','cp','/tmp/elivepatch-' + uuid_dir + '/config',kernel_source_dir + '.config'])
-        command(['sudo','make','oldconfig'], kernel_source_dir)
+        # olddefconfig default everything that is new from the configuration file
+        command(['sudo','make','olddefconfig'], kernel_source_dir)
         command(['sudo','make'], kernel_source_dir)
         command(['sudo','make', 'modules'], kernel_source_dir)
         command(['sudo','make', 'modules_install'], kernel_source_dir)
+
 
 def command(bashCommand, kernel_source_dir=None):
         """
