@@ -159,9 +159,8 @@ class GetFiles(Resource):
 
         configFile_name = os.path.join('/tmp','elivepatch-' + args['UUID'], configFile_name)
         if os.path.exists('/tmp/elivepatch-' + args['UUID']):
-            # TODO: case the path already exist
             print('the folder: "/tmp/elivepatch-' + args['UUID'] + '" is already present')
-            pass
+            return {'the request with ' + args['UUID'] + ' is already present'}, 201
         else:
             print('creating: "/tmp/elivepatch-' + args['UUID'])
             os.makedirs('/tmp/elivepatch-' + args['UUID'])
