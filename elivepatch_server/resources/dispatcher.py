@@ -109,7 +109,7 @@ class SendLivePatch(Resource):
         args['UUID'] = check_uuid(args['UUID'])
         uuid_dir = get_uuid_dir(args['UUID'])
 
-        livepatch_full_path = os.path.join(uuid_dir, 'kpatch-'+ str(args['UUID']) + '-livepatch.ko')
+        livepatch_full_path = os.path.join(uuid_dir, 'kpatch-01.ko')
         try:
             with open(livepatch_full_path, 'rb') as fp:
                 response = make_response(fp.read())
