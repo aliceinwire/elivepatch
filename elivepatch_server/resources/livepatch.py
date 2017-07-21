@@ -67,7 +67,6 @@ class PaTch(object):
         command(['sudo','make','olddefconfig'], kernel_source_dir)
         command(['sudo','make'], kernel_source_dir)
         command(['sudo','make', 'modules'], kernel_source_dir)
-        command(['sudo','make', 'modules_install'], kernel_source_dir)
 
 
 def command(bashCommand, kernel_source_dir=None):
