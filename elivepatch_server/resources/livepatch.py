@@ -31,7 +31,7 @@ class PaTch(object):
         if not os.path.isfile(vmlinux_source):
             self.build_kernel(uuid)
         debug=True
-        bashCommand = ['kpatch-build']
+        bashCommand = ['sudo', 'kpatch-build']
         bashCommand.extend(['-s',kernel_source])
         bashCommand.extend(['-v',vmlinux_source])
         bashCommand.extend(['-c','config'])
