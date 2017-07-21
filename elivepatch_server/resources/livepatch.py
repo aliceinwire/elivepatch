@@ -16,12 +16,13 @@ class PaTch(object):
     # kpatch-build/kpatch-build -s /usr/src/linux-4.9.16-gentoo/
     # -v /usr/src/linux-4.9.16-gentoo/vmlinux examples/test.patch
     # -c ../elivepatch/elivepatch_server/config --skip-gcc-check
-    def build_livepatch(self, uuid, vmlinux):
+    def build_livepatch(self, uuid, vmlinux, debug=True):
         """
         Function for building the livepatch
 
         :param uuid: UUID session identification
         :param vmlinux: path to the vmlinux file
+        :param debug: copy build.log in the uuid directory
         :return: void
         """
         # TODO: use $CACHEDIR for define the .kpatch folder, if needed
@@ -30,7 +31,6 @@ class PaTch(object):
         vmlinux_source = os.path.join(kernel_source, vmlinux)
         if not os.path.isfile(vmlinux_source):
             self.build_kernel(uuid)
-        debug=True
         bashCommand = ['sudo', 'kpatch-build']
         bashCommand.extend(['-s',kernel_source])
         bashCommand.extend(['-v',vmlinux_source])
@@ -41,6 +41,8 @@ class PaTch(object):
             bashCommand.extend(['--skip-cleanup'])
             bashCommand.extend(['--debug'])
         command(bashCommand, uuid_dir)
+        if debug:
+            command(['sudo','cp', '-f', '/root/.kpatch/build.log', uuid_dir ])
 
     def get_kernel_sources(self, uuid_dir, kernel_version):
         """
