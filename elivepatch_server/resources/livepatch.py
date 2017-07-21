@@ -6,6 +6,7 @@
 
 import subprocess
 import os
+import fileinput
 
 
 class PaTch(object):
@@ -64,6 +65,17 @@ class PaTch(object):
 
     def build_kernel(self, uuid):
         kernel_source_dir = '/tmp/elivepatch-' + uuid + '/usr/src/linux/'
+        uuid_dir_config = '/tmp/elivepatch-' + uuid + '/config'
+        if 'CONFIG_DEBUG_INFO=y' in open(uuid_dir_config).read():
+            print("DEBUG_INFO correctly present")
+        elif 'CONFIG_DEBUG_INFO=n' in open(uuid_dir_config).read():
+            print("changing DEBUG_INFO to yes")
+            for line in fileinput.input(uuid_dir_config, inplace = 1):
+                print(line.replace("CONFIG_DEBUG_INFO=n", "CONFIG_DEBUG_INFO=y"))
+        else:
+            print("Adding DEBUG_INFO for getting kernel debug symbols")
+            for line in fileinput.input(uuid_dir_config, inplace = 1):
+                print(line.replace("# CONFIG_DEBUG_INFO is not set", "CONFIG_DEBUG_INFO=y"))
         command(['sudo','cp','/tmp/elivepatch-' + uuid + '/config',kernel_source_dir + '.config'])
         # olddefconfig default everything that is new from the configuration file
         command(['sudo','make','olddefconfig'], kernel_source_dir)
