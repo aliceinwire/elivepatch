@@ -44,7 +44,7 @@ class PaTch(object):
         if debug:
             command(['sudo','cp', '-f', '/root/.kpatch/build.log', uuid_dir ])
 
-    def get_kernel_sources(self, uuid_dir, kernel_version):
+    def get_kernel_sources(self, uuid, kernel_version):
         """
         Function for download the kernel sources
 
@@ -58,13 +58,13 @@ class PaTch(object):
         ebuild_path = os.path.join('gentoo-sources_overlay', 'sys-kernel', 'gentoo-sources', 'gentoo-sources-' + kernel_version + '.ebuild')
         print(ebuild_path)
         if os.path.isfile(ebuild_path):
-            command(['sudo', 'ROOT=/tmp/elivepatch-' + uuid_dir, 'ebuild', ebuild_path, 'clean', 'merge'])
+            command(['sudo', 'ROOT=/tmp/elivepatch-' + uuid, 'ebuild', ebuild_path, 'clean', 'merge'])
         else:
             print('ebuild not present')
 
-    def build_kernel(self, uuid_dir):
-        kernel_source_dir = '/tmp/elivepatch-' + uuid_dir + '/usr/src/linux/'
-        command(['sudo','cp','/tmp/elivepatch-' + uuid_dir + '/config',kernel_source_dir + '.config'])
+    def build_kernel(self, uuid):
+        kernel_source_dir = '/tmp/elivepatch-' + uuid + '/usr/src/linux/'
+        command(['sudo','cp','/tmp/elivepatch-' + uuid + '/config',kernel_source_dir + '.config'])
         # olddefconfig default everything that is new from the configuration file
         command(['sudo','make','olddefconfig'], kernel_source_dir)
         command(['sudo','make'], kernel_source_dir)
