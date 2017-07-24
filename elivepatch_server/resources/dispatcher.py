@@ -72,7 +72,9 @@ class BuildLivePatch(Resource):
         if args['KernelVersion']:
             print("build livepatch: " + str(args))
             # check vmlinux presence if not rebuild the kernel
-            lpatch.get_kernel_sources(args['UUID'], args['KernelVersion'])
+            kernel_sources_status = lpatch.get_kernel_sources(args['UUID'], args['KernelVersion'])
+            if not kernel_sources_status:
+                return make_response(jsonify({'message': 'gentoo-sources not available'}), 403)
             lpatch.build_livepatch(args['UUID'], 'vmlinux')
         pack = {
             'id': packs['id'] + 1,

@@ -60,8 +60,11 @@ class PaTch(object):
         print(ebuild_path)
         if os.path.isfile(ebuild_path):
             command(['sudo', 'ROOT=/tmp/elivepatch-' + uuid, 'ebuild', ebuild_path, 'clean', 'merge'])
+            kernel_sources_status = True
         else:
             print('ebuild not present')
+            kernel_sources_status = None
+        return kernel_sources_status
 
     def build_kernel(self, uuid):
         kernel_source_dir = '/tmp/elivepatch-' + uuid + '/usr/src/linux/'
