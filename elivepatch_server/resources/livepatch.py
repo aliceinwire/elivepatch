@@ -7,6 +7,7 @@
 import subprocess
 import os
 import fileinput
+import tempfile
 
 
 class PaTch(object):
@@ -26,13 +27,16 @@ class PaTch(object):
         :param debug: copy build.log in the uuid directory
         :return: void
         """
-        # TODO: use $CACHEDIR for define the .kpatch folder, if needed
         kernel_source = os.path.join('/tmp/','elivepatch-' + uuid, 'usr/src/linux/')
         uuid_dir = os.path.join('/tmp/','elivepatch-' + uuid)
         vmlinux_source = os.path.join(kernel_source, vmlinux)
+        kpatch_cachedir = os.path.join(uuid_dir, 'kpatch')
+
+        os.makedirs(kpatch_cachedir)
         if not os.path.isfile(vmlinux_source):
             self.build_kernel(uuid)
-        bashCommand = ['sudo', 'kpatch-build']
+
+        bashCommand = ['kpatch-build']
         bashCommand.extend(['-s',kernel_source])
         bashCommand.extend(['-v',vmlinux_source])
         bashCommand.extend(['-c','config'])
@@ -41,9 +45,9 @@ class PaTch(object):
         if debug:
             bashCommand.extend(['--skip-cleanup'])
             bashCommand.extend(['--debug'])
-        command(bashCommand, uuid_dir)
+        command(bashCommand, uuid_dir, {'CACHEDIR': kpatch_cachedir})
         if debug:
-            command(['sudo','cp', '-f', '/root/.kpatch/build.log', uuid_dir ])
+            command(['cp', '-f', os.path.join(kpatch_cachedir, 'build.log'), uuid_dir ])
 
     def get_kernel_sources(self, uuid, kernel_version):
         """
@@ -56,11 +60,15 @@ class PaTch(object):
         except:
             print('git clone failed.')
 
+        uuid_dir = os.path.join('/tmp/','elivepatch-' + uuid)
         ebuild_path = os.path.join('gentoo-sources_overlay', 'sys-kernel', 'gentoo-sources', 'gentoo-sources-' + kernel_version + '.ebuild')
         print(ebuild_path)
         if os.path.isfile(ebuild_path):
-            command(['sudo', 'ROOT=/tmp/elivepatch-' + uuid, 'ebuild', ebuild_path, 'clean', 'merge'])
-            kernel_sources_status = True
+            # Use a private tmpdir for portage
+            with tempfile.TemporaryDirectory(dir=uuid_dir) as portage_tmpdir:
+                env = {'ROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
+                command(['ebuild', ebuild_path, 'clean', 'merge'], env=env)
+                kernel_sources_status = True
         else:
             print('ebuild not present')
             kernel_sources_status = None
@@ -79,14 +87,14 @@ class PaTch(object):
             print("Adding DEBUG_INFO for getting kernel debug symbols")
             for line in fileinput.input(uuid_dir_config, inplace = 1):
                 print(line.replace("# CONFIG_DEBUG_INFO is not set", "CONFIG_DEBUG_INFO=y"))
-        command(['sudo','cp','/tmp/elivepatch-' + uuid + '/config',kernel_source_dir + '.config'])
+        command(['cp','/tmp/elivepatch-' + uuid + '/config',kernel_source_dir + '.config'])
         # olddefconfig default everything that is new from the configuration file
-        command(['sudo','make','olddefconfig'], kernel_source_dir)
-        command(['sudo','make'], kernel_source_dir)
-        command(['sudo','make', 'modules'], kernel_source_dir)
+        command(['make','olddefconfig'], kernel_source_dir)
+        command(['make'], kernel_source_dir)
+        command(['make', 'modules'], kernel_source_dir)
 
 
-def command(bashCommand, kernel_source_dir=None):
+def command(bashCommand, kernel_source_dir=None, env=None):
         """
         Popen override function
 
@@ -94,13 +102,19 @@ def command(bashCommand, kernel_source_dir=None):
         :param kernel_source_dir: the source directory of the kernel
         :return: void
         """
+        # Inherit the parent environment and update the private copy
+        if env:
+            process_env = os.environ.copy()
+            process_env.update(env)
+            env = process_env
+
         if kernel_source_dir:
             print(bashCommand)
-            process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE,  cwd=kernel_source_dir)
+            process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE,  cwd=kernel_source_dir, env=env)
             output, error = process.communicate()
             print(output)
         else:
             print(bashCommand)
-            process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE)
+            process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE, env=env)
             output, error = process.communicate()
             print(output)
