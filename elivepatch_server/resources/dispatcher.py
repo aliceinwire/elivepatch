@@ -147,7 +147,7 @@ class GetFiles(Resource):
         args = self.reqparse.parse_args()
         args['UUID'] = check_uuid(args['UUID'])
         parse = reqparse.RequestParser()
-        parse.add_argument('patch', type=werkzeug.datastructures.FileStorage,
+        parse.add_argument('patch', action='append', type=werkzeug.datastructures.FileStorage,
                            location='files')
         parse.add_argument('config', type=werkzeug.datastructures.FileStorage,
                            location='files')
@@ -156,8 +156,9 @@ class GetFiles(Resource):
         configFile = file_args['config']
         configFile_name = file_args['config'].filename
 
-        patchfile = file_args['patch']
-        patchfile_name = file_args['patch'].filename
+        for patch in file_args['patch']:
+            patchfile = patch
+            patchfile_name = patch.filename
 
         configFile_name = os.path.join('/tmp','elivepatch-' + args['UUID'], configFile_name)
         if os.path.exists('/tmp/elivepatch-' + args['UUID']):
