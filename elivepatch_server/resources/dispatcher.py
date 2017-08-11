@@ -49,48 +49,6 @@ def get_uuid_dir(uuid):
     return os.path.join('/tmp/', 'elivepatch-' + uuid)
 
 
-class BuildLivePatch(Resource):
-
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('KernelVersion', type=str, required=False,
-                                   help='No task title provided',
-                                   location='json')
-        self.reqparse.add_argument('UUID', type=str, required=False,
-                                   help='No task title provided',
-                                   location='json')
-        super(BuildLivePatch, self).__init__()
-        pass
-
-    def get(self):
-        return {'packs': [marshal(pack, pack_fields) for pack in packs]}
-
-    def post(self):
-        lpatch = PaTch()
-        args = self.reqparse.parse_args()
-        args['UUID'] = check_uuid(args['UUID'])
-        if args['KernelVersion']:
-            print("build livepatch: " + str(args))
-            # check vmlinux presence if not rebuild the kernel
-            kernel_sources_status = lpatch.get_kernel_sources(args['UUID'], args['KernelVersion'])
-            if not kernel_sources_status:
-                return make_response(jsonify({'message': 'gentoo-sources not available'}), 403)
-            lpatch.build_livepatch(args['UUID'], 'vmlinux')
-        pack = {
-            'id': packs['id'] + 1,
-            'KernelVersion': args['KernelVersion'],
-            'UUID' : args['UUID']
-        }
-        return {'build_livepatch': marshal(pack, pack_fields)}, 201
-
-    @staticmethod
-    def build_kernel_path(uuid, kernel_version):
-        kernel_absolute_path = 'linux-' + str(kernel_version) + '-gentoo'
-        kernel_path = os.path.join('/tmp/', 'elivepatch-' + uuid, 'usr',
-                                   'src', kernel_absolute_path)
-        return kernel_path
-
-
 class SendLivePatch(Resource):
 
     def __init__(self):
@@ -149,17 +107,19 @@ class GetFiles(Resource):
         parse = reqparse.RequestParser()
         parse.add_argument('patch', action='append', type=werkzeug.datastructures.FileStorage,
                            location='files')
+        parse.add_argument('main_patch', action='append', type=werkzeug.datastructures.FileStorage,
+                           location='files')
         parse.add_argument('config', type=werkzeug.datastructures.FileStorage,
                            location='files')
         file_args = parse.parse_args()
+
+        lpatch = PaTch()
+
         print("file get config: " + str(file_args))
         configFile = file_args['config']
         configFile_name = file_args['config'].filename
 
-        for patch in file_args['patch']:
-            patchfile = patch
-            patchfile_name = patch.filename
-
+        # saving config file
         configFile_name = os.path.join('/tmp','elivepatch-' + args['UUID'], configFile_name)
         if os.path.exists('/tmp/elivepatch-' + args['UUID']):
             print('the folder: "/tmp/elivepatch-' + args['UUID'] + '" is already present')
@@ -170,8 +130,38 @@ class GetFiles(Resource):
 
         configFile.save(configFile_name)
 
-        patch_fulldir_name = os.path.join('/tmp','elivepatch-' + args['UUID'], patchfile_name)
-        patchfile.save(patch_fulldir_name)
+
+        # saving incremental patches
+        incremental_patches_directory = os.path.join('/tmp', 'elivepatch-' + args['UUID'], 'etc', 'portage', 'patches',
+                                                     'sys-kernel', 'gentoo-sources')
+        if os.path.exists(incremental_patches_directory):
+            print('the folder: "/tmp/elivepatch-' + args['UUID'] + '" is already present')
+            return {'the request with ' + args['UUID'] + ' is already present'}, 201
+        else:
+            print('creating: '+incremental_patches_directory)
+            os.makedirs(incremental_patches_directory)
+        try:
+            for patch in file_args['patch']:
+                print(str(patch))
+                patchfile = patch
+                patchfile_name = patch.filename
+                patch_fulldir_name = os.path.join(incremental_patches_directory, patchfile_name)
+                patchfile.save(patch_fulldir_name)
+        except:
+            print('no incremental patches')
+
+        # saving main patch
+        print(str(file_args['main_patch']))
+        main_patchfile = file_args['main_patch'][0]
+        main_patchfile_name = main_patchfile.filename
+        main_patch_fulldir_name = os.path.join('/tmp','elivepatch-' + args['UUID'], main_patchfile_name)
+        main_patchfile.save(main_patch_fulldir_name)
+
+        # check vmlinux presence if not rebuild the kernel
+        kernel_sources_status = lpatch.get_kernel_sources(args['UUID'], args['KernelVersion'])
+        if not kernel_sources_status:
+            return make_response(jsonify({'message': 'gentoo-sources not available'}), 403)
+        lpatch.build_livepatch(args['UUID'], 'vmlinux')
 
         pack = {
            'id': packs['id'] + 1,

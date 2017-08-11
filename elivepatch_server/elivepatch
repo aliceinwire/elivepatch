@@ -26,11 +26,6 @@ def create_app():
     api.add_resource(AgentInfo.AgentAPI, '/elivepatch/api/v1.0/agent',
                      endpoint='agent')
 
-    # where to start the livepatch build
-    api.add_resource(dispatcher.BuildLivePatch,
-                     '/elivepatch/api/v1.0/build_livepatch',
-                     endpoint='build_livepatch')
-
     # where to retrieve the live patch when ready
     api.add_resource(dispatcher.SendLivePatch,
                      '/elivepatch/api/v1.0/send_livepatch',
