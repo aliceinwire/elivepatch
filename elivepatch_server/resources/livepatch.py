@@ -40,7 +40,7 @@ class PaTch(object):
         bashCommand.extend(['-s',kernel_source])
         bashCommand.extend(['-v',vmlinux_source])
         bashCommand.extend(['-c','config'])
-        bashCommand.extend(['01.patch'])
+        bashCommand.extend(['main.patch'])
         bashCommand.extend(['--skip-gcc-check'])
         if debug:
             bashCommand.extend(['--skip-cleanup'])
