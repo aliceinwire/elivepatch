@@ -66,7 +66,8 @@ class PaTch(object):
         if os.path.isfile(ebuild_path):
             # Use a private tmpdir for portage
             with tempfile.TemporaryDirectory(dir=uuid_dir) as portage_tmpdir:
-                env = {'ROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
+                print('uuid_dir: ' + str(uuid_dir) + ' PORTAGE_TMPDIR: '+str(portage_tmpdir))
+                env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT':uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
                 command(['ebuild', ebuild_path, 'clean', 'merge'], env=env)
                 kernel_sources_status = True
         else:
