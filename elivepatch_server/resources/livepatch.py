@@ -97,7 +97,8 @@ def command(bashCommand, kernel_source_dir=None, env=None):
         Popen override function
 
         :param bashCommand: List of command arguments to execute
-        :param kernel_source_dir: the source directory of the kernel
+        :param kernel_source_dir: String with the directory where the command is executed
+        :param env: Dictionary for setting system environment variable
         :return: void
         """
         # Inherit the parent environment and update the private copy
