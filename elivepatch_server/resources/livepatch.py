@@ -42,9 +42,9 @@ class PaTch(object):
         if debug:
             bashCommand.extend(['--skip-cleanup'])
             bashCommand.extend(['--debug'])
-        command(bashCommand, uuid_dir, {'CACHEDIR': kpatch_cachedir})
+        _command(bashCommand, uuid_dir, {'CACHEDIR': kpatch_cachedir})
         if debug:
-            command(['cp', '-f', os.path.join(kpatch_cachedir, 'build.log'), uuid_dir ])
+            _command(['cp', '-f', os.path.join(kpatch_cachedir, 'build.log'), uuid_dir])
 
     def get_kernel_sources(self, uuid, kernel_version):
         """
@@ -53,7 +53,7 @@ class PaTch(object):
         :return: void
         """
         try:
-            command(['git','clone','https://github.com/aliceinwire/gentoo-sources_overlay.git'])
+            _command(['git', 'clone', 'https://github.com/aliceinwire/gentoo-sources_overlay.git'])
         except:
             print('git clone failed.')
 
@@ -65,7 +65,7 @@ class PaTch(object):
             with tempfile.TemporaryDirectory(dir=uuid_dir) as portage_tmpdir:
                 print('uuid_dir: ' + str(uuid_dir) + ' PORTAGE_TMPDIR: '+str(portage_tmpdir))
                 env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT':uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
-                command(['ebuild', ebuild_path, 'clean', 'merge'], env=env)
+                _command(['ebuild', ebuild_path, 'clean', 'merge'], env=env)
                 kernel_sources_status = True
         else:
             print('ebuild not present')
@@ -85,14 +85,14 @@ class PaTch(object):
             print("Adding DEBUG_INFO for getting kernel debug symbols")
             for line in fileinput.input(uuid_dir_config, inplace = 1):
                 print(line.replace("# CONFIG_DEBUG_INFO is not set", "CONFIG_DEBUG_INFO=y"))
-        command(['cp','/tmp/elivepatch-' + uuid + '/config',kernel_source_dir + '.config'])
+        _command(['cp', '/tmp/elivepatch-' + uuid + '/config', kernel_source_dir + '.config'])
         # olddefconfig default everything that is new from the configuration file
-        command(['make','olddefconfig'], kernel_source_dir)
-        command(['make'], kernel_source_dir)
-        command(['make', 'modules'], kernel_source_dir)
+        _command(['make', 'olddefconfig'], kernel_source_dir)
+        _command(['make'], kernel_source_dir)
+        _command(['make', 'modules'], kernel_source_dir)
 
 
-def command(bashCommand, kernel_source_dir=None, env=None):
+def _command(bashCommand, kernel_source_dir=None, env=None):
         """
         Popen override function
 
