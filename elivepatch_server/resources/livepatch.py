@@ -15,9 +15,6 @@ class PaTch(object):
     def __init__(self):
         pass
 
-    # kpatch-build/kpatch-build -s /usr/src/linux-4.9.16-gentoo/
-    # -v /usr/src/linux-4.9.16-gentoo/vmlinux examples/test.patch
-    # -c ../elivepatch/elivepatch_server/config --skip-gcc-check
     def build_livepatch(self, uuid, vmlinux, debug=True):
         """
         Function for building the livepatch
@@ -113,9 +110,11 @@ def command(bashCommand, kernel_source_dir=None, env=None):
             print(bashCommand)
             process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE,  cwd=kernel_source_dir, env=env)
             output, error = process.communicate()
-            print(output)
+            for output_line in output.split(b'\n'):
+                print(output_line.strip())
         else:
             print(bashCommand)
             process = subprocess.Popen(bashCommand, stdout=subprocess.PIPE, env=env)
             output, error = process.communicate()
-            print(output)
+            for output_line in output.split(b'\n'):
+                print(output_line.strip())
