@@ -169,22 +169,3 @@ class GetFiles(Resource):
             'UUID' : args['UUID']
         }
         return {'get_config': marshal(pack, pack_fields)}, 201
-
-
-class GetID(Resource):
-
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('UUID', type=str, required=False,
-                                   help='No task title provided',
-                                   location='json')
-        super(GetID, self).__init__()
-        pass
-
-    def get(self):
-        return make_response(jsonify({'message': 'These are not the \
-        patches you are looking for'}), 403)
-
-    def post(self):
-        args = self.reqparse.parse_args()
-        print("get ID: " + str(args))
