@@ -65,7 +65,7 @@ class PaTch(object):
             with tempfile.TemporaryDirectory(dir=uuid_dir) as portage_tmpdir:
                 print('uuid_dir: ' + str(uuid_dir) + ' PORTAGE_TMPDIR: '+str(portage_tmpdir))
                 env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT':uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
-                _command(['ebuild', ebuild_path, 'clean', 'merge'], env=env)
+                _command(['ebuild', ebuild_path, 'clean', 'digest','merge'], env=env)
                 kernel_sources_status = True
         else:
             print('ebuild not present')
