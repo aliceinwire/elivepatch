@@ -24,8 +24,8 @@ class PaTch(object):
         :param debug: copy build.log in the uuid directory
         :return: void
         """
-        kernel_source = os.path.join('/tmp/','elivepatch-' + uuid, 'usr/src/linux/')
-        uuid_dir = os.path.join('/tmp/','elivepatch-' + uuid)
+        kernel_source = os.path.join('/tmp/', 'elivepatch-' + uuid, 'usr/src/linux/')
+        uuid_dir = os.path.join('/tmp/', 'elivepatch-' + uuid)
         vmlinux_source = os.path.join(kernel_source, vmlinux)
         kpatch_cachedir = os.path.join(uuid_dir, 'kpatch')
 
@@ -34,9 +34,9 @@ class PaTch(object):
             self.build_kernel(uuid)
 
         bashCommand = ['kpatch-build']
-        bashCommand.extend(['-s',kernel_source])
-        bashCommand.extend(['-v',vmlinux_source])
-        bashCommand.extend(['-c','config'])
+        bashCommand.extend(['-s', kernel_source])
+        bashCommand.extend(['-v', vmlinux_source])
+        bashCommand.extend(['-c', 'config'])
         bashCommand.extend(['main.patch'])
         bashCommand.extend(['--skip-gcc-check'])
         if debug:
@@ -57,15 +57,16 @@ class PaTch(object):
         except:
             print('git clone failed.')
 
-        uuid_dir = os.path.join('/tmp/','elivepatch-' + uuid)
+        uuid_dir = os.path.join('/tmp/', 'elivepatch-' + uuid)
         ebuild_path = os.path.join('gentoo-sources_overlay', 'sys-kernel', 'gentoo-sources', 'gentoo-sources-' + kernel_version + '.ebuild')
         print(ebuild_path)
         if os.path.isfile(ebuild_path):
             # Use a private tmpdir for portage
             with tempfile.TemporaryDirectory(dir=uuid_dir) as portage_tmpdir:
-                print('uuid_dir: ' + str(uuid_dir) + ' PORTAGE_TMPDIR: '+str(portage_tmpdir))
-                env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT':uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
-                _command(['ebuild', ebuild_path, 'clean', 'digest','merge'], env=env)
+                print('uuid_dir: ' + str(uuid_dir) + ' PORTAGE_TMPDIR: ' + str(portage_tmpdir))
+                # portage_tmpdir is not always working with root priviledges
+                env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
+                _command(['ebuild', ebuild_path, 'clean', 'digest', 'merge'], env=env)
                 kernel_sources_status = True
         else:
             print('ebuild not present')
@@ -79,11 +80,11 @@ class PaTch(object):
             print("DEBUG_INFO correctly present")
         elif 'CONFIG_DEBUG_INFO=n' in open(uuid_dir_config).read():
             print("changing DEBUG_INFO to yes")
-            for line in fileinput.input(uuid_dir_config, inplace = 1):
+            for line in fileinput.input(uuid_dir_config, inplace=1):
                 print(line.replace("CONFIG_DEBUG_INFO=n", "CONFIG_DEBUG_INFO=y"))
         else:
             print("Adding DEBUG_INFO for getting kernel debug symbols")
-            for line in fileinput.input(uuid_dir_config, inplace = 1):
+            for line in fileinput.input(uuid_dir_config, inplace=1):
                 print(line.replace("# CONFIG_DEBUG_INFO is not set", "CONFIG_DEBUG_INFO=y"))
         _command(['cp', '/tmp/elivepatch-' + uuid + '/config', kernel_source_dir + '.config'])
         # olddefconfig default everything that is new from the configuration file
