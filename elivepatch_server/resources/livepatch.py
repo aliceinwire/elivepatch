@@ -67,10 +67,17 @@ class PaTch(object):
                 print('uuid_dir: ' + str(uuid_dir) + ' PORTAGE_TMPDIR: ' + str(portage_tmpdir))
                 # portage_tmpdir is not always working with root privileges
                 if debug:
-                    env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir,
-                           'PORTAGE_DEBUG': '1'}
+                    if os.geteuid() != 0:
+                        env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir,
+                               'PORTAGE_DEBUG': '1'}
+                    else:
+                        env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': uuid_dir,
+                               'PORTAGE_DEBUG': '1'}
                 else:
-                    env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
+                    if os.geteuid() != 0:
+                        env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
+                    else:
+                        env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': uuid_dir}
                 _command(['ebuild', ebuild_path, 'clean', 'digest', 'merge'], env=env)
                 kernel_sources_status = True
         else:
