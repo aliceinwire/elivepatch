@@ -78,7 +78,7 @@ class PaTch(object):
                         env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
                     else:
                         env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': uuid_dir}
-                _command(['ebuild', ebuild_path, 'clean', 'digest', 'merge'], env=env)
+                _command(['ebuild', ebuild_path, 'digest', 'clean', 'merge'], env=env)
                 kernel_sources_status = True
         else:
             print('ebuild not present')
