@@ -46,7 +46,7 @@ class PaTch(object):
         if debug:
             _command(['cp', '-f', os.path.join(kpatch_cachedir, 'build.log'), uuid_dir])
 
-    def get_kernel_sources(self, uuid, kernel_version):
+    def get_kernel_sources(self, uuid, kernel_version, debug=True):
         """
         Function for download the kernel sources
 
@@ -58,14 +58,19 @@ class PaTch(object):
             print('git clone failed.')
 
         uuid_dir = os.path.join('/tmp/', 'elivepatch-' + uuid)
-        ebuild_path = os.path.join('gentoo-sources_overlay', 'sys-kernel', 'gentoo-sources', 'gentoo-sources-' + kernel_version + '.ebuild')
+        ebuild_path = os.path.join('gentoo-sources_overlay', 'sys-kernel', 'gentoo-sources', 'gentoo-sources-' +
+                                   kernel_version + '.ebuild')
         print(ebuild_path)
         if os.path.isfile(ebuild_path):
             # Use a private tmpdir for portage
             with tempfile.TemporaryDirectory(dir=uuid_dir) as portage_tmpdir:
                 print('uuid_dir: ' + str(uuid_dir) + ' PORTAGE_TMPDIR: ' + str(portage_tmpdir))
-                # portage_tmpdir is not always working with root priviledges
-                env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
+                # portage_tmpdir is not always working with root privileges
+                if debug:
+                    env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir,
+                           'PORTAGE_DEBUG': '1'}
+                else:
+                    env = {'ROOT': uuid_dir, 'PORTAGE_CONFIGROOT': uuid_dir, 'PORTAGE_TMPDIR': portage_tmpdir}
                 _command(['ebuild', ebuild_path, 'clean', 'digest', 'merge'], env=env)
                 kernel_sources_status = True
         else:
