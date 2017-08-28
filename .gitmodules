@@ -1,0 +1,6 @@
+[submodule "elivepatch-server"]
+	path = elivepatch-server
+	url = https://github.com/aliceinwire/elivepatch-server
+[submodule "elivepatch-client"]
+	path = elivepatch-client
+	url = https://github.com/aliceinwire/elivepatch-client
