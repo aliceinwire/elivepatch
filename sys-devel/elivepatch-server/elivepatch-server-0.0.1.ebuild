@@ -28,14 +28,7 @@ python_prepare_all() {
 python_install() {
     # Install sbin scripts to bindir for python-exec linking
     # they will be relocated in pkg_preinst()
-    distutils-r1_python_install \
-        --system-prefix="${EPREFIX}/usr" \
-        --bindir="$(python_get_scriptdir)" \
-        --docdir="${EPREFIX}/usr/share/doc/${PF}" \
-        --htmldir="${EPREFIX}/usr/share/doc/${PF}/html" \
-        --sbindir="$(python_get_scriptdir)" \
-        --sysconfdir="${EPREFIX}/etc" \
-        "${@}"
+    distutils-r1_python_install
 }
 
 
